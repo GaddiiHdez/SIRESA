@@ -46,6 +46,10 @@ async function handleResponse(res, errorMessage = 'Error en la solicitud.') {
     }
     throw new Error('Sesión no autorizada o token expirado. Por favor inicia sesión.');
   }
+  const contentType = res.headers.get('content-type') || '';
+  if (!contentType.includes('application/json')) {
+    throw new Error('El servidor no respondió en formato JSON. Verifica la variable VITE_API_URL.');
+  }
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err.detail || err.error || errorMessage);
@@ -61,6 +65,12 @@ export async function apiLogin(username, password) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username, password })
   });
+
+  const contentType = res.headers.get('content-type') || '';
+  if (!contentType.includes('application/json')) {
+    throw new Error('No se pudo conectar al servidor Backend API. Revisa la variable VITE_API_URL en el Frontend.');
+  }
+
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err.error || 'Credenciales inválidas o error de conexión.');
