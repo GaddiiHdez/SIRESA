@@ -20,7 +20,7 @@ services:
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.local
     container_name: sdr_express_backend
     restart: always
     ports:
@@ -38,7 +38,7 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.local
       args:
         VITE_API_URL: http://localhost:5000/api
     container_name: sdr_nginx_frontend
