@@ -2,7 +2,7 @@ import React from 'react';
 import { X, Calendar, ClipboardCheck, Layers, User as UserIcon, Wallet, FileText, Upload, Lock } from 'lucide-react';
 import { formatMoneda, formatFecha, formatModulo } from '../../../shared/utils/formatters';
 import PasoEspecifico from './PasoEspecifico';
-import { apiSubirDocumento, apiActualizarDocumentos, getCurrentUser } from '../../../shared/services/api';
+import { apiSubirDocumento, apiActualizarDocumentos, getCurrentUser, getFileUrl } from '../../../shared/services/api';
 import { toast } from '../../../shared/utils/toast';
 
 export default function ExpedienteDetalleModal({
@@ -277,7 +277,7 @@ export default function ExpedienteDetalleModal({
                             <span className="font-bold text-slate-700 truncate">{doc.label}</span>
                             {isUploaded && (
                               <a
-                                href={`http://localhost:5000${fileUrl}`}
+                                href={getFileUrl(fileUrl)}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-[10px] text-nayarit-gold hover:underline font-bold mt-0.5"

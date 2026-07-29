@@ -1,6 +1,7 @@
 import React from 'react';
 import { Upload, CheckCircle, AlertCircle, UserCheck, FileBadge, FileText, MapPin, DollarSign } from 'lucide-react';
 import { toast } from '../../../shared/utils/toast';
+import { getFileUrl } from '../../../shared/services/api';
 
 export default function PasoDocumentos({ documentosCargados, docProgress, onUpload }) {
   const [activeKey, setActiveKey] = React.useState(null);
@@ -69,7 +70,7 @@ export default function PasoDocumentos({ documentosCargados, docProgress, onUplo
                   <span className="text-slate-800 text-sm md:text-[15px] font-bold block leading-snug">{doc.label}</span>
                   {isUploaded ? (
                     <a
-                      href={`http://localhost:5000${fileUrl}`}
+                      href={getFileUrl(fileUrl)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-[10px] text-nayarit-gold hover:underline font-bold block mt-0.5"

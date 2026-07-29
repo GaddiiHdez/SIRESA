@@ -1,6 +1,11 @@
 // Servicio de API — llamadas reales al backend con control de sesión seguro.
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+export function getFileUrl(path) {
+  if (!path) return '';
+  if (path.startsWith('http://') || path.startsWith('https://')) return path;
+  const baseUrl = API_URL.replace(/\/api\/?$/, '');
+  return `${baseUrl}${path.startsWith('/') ? '' : '/'}${path}`;
+}
 
 // ---------- Gestión de token y sesión ----------
 
