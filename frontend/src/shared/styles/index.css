@@ -1,0 +1,101 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-nayarit-dark: #5E1232;
+  --color-nayarit-green: #5E1232;
+  --color-nayarit-lightGreen: #7D1C45;
+  --color-nayarit-gold: #C29A52;
+  --color-nayarit-lightGold: #DAB777;
+  --color-nayarit-light: #FAF8F4;
+  --color-nayarit-slate: #404040;
+}
+
+
+/* Estilos de Base */
+body {
+  background-color: #FAF8F4;
+  color: #404040;
+  font-family: 'Outfit', 'Inter', sans-serif;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Efectos de Glassmorphism Premium */
+.glass-card {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.04);
+}
+
+.glass-nav {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.glass-input {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-input:focus {
+  background: #ffffff;
+  border-color: #C29A52; /* Dorado Envejecido */
+  box-shadow: 0 0 0 3px rgba(194, 154, 82, 0.15);
+  outline: none;
+}
+
+.glass-dark {
+  background: rgba(94, 18, 50, 0.9); /* Borgoña Profundo */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+/* Micro-animaciones y efectos suaves */
+.transition-smooth {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Scrollbar Personalizado */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Transiciones entre Pasos del Wizard */
+.wizard-step-enter {
+  opacity: 0;
+  transform: translateX(10px);
+}
+.wizard-step-enter-active {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 300ms, transform 300ms;
+}
+.wizard-step-exit {
+  opacity: 1;
+  transform: translateX(0);
+}
+.wizard-step-exit-active {
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: opacity 300ms, transform 300ms;
+}

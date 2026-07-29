@@ -1,0 +1,323 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String   @id @default(uuid())
+  username     String   @unique
+  passwordHash String
+  name         String
+  role         String   @default("FUNCIONARIO") // FUNCIONARIO, ADMINISTRADOR
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Solicitud {
+  id             String   @id @default(uuid())
+  folio          String   @unique
+  fechaRegistro  DateTime @default(now())
+  fechaSolicitud DateTime @default(now())
+  programa       String
+  componente     String
+  moduloTipo     String   // GANADERIA, AGRICULTURA_FRIJOL, PESCA_ACUACULTURA, INFRAESTRUCTURA, MAQUINARIA, MEDIOS, TEMAS_IMPORTANTES
+  status         String   @default("REGISTRADA") // REGISTRADA, EN REVISIÓN, DICTAMINADA, APROBADA, PAGADA, FINALIZADA
+
+  // Relaciones principales
+  productorId    String?   @unique
+  productor      Productor? @relation(fields: [productorId], references: [id], onDelete: Cascade)
+
+  apoyoControlId String?   @unique
+  apoyoControl   ApoyoControl? @relation(fields: [apoyoControlId], references: [id], onDelete: Cascade)
+
+  // Documentos cargados (URLs / Rutas de archivos)
+  ineUrl         String?
+  curpUrl        String?
+  rfcUrl         String?
+  comprobanteUrl String?
+  facturaUrl     String?
+
+  // Relaciones opcionales a datos específicos
+  datosGanaderia           DatosGanaderia?
+  datosAgriculturaFrijol   DatosAgriculturaFrijol?
+  datosPescaAcuacultura   DatosPescaAcuacultura?
+  datosInfraestructura     DatosInfraestructura?
+  datosMaquinaria          DatosMaquinaria?
+  datosMedios              DatosMedios?
+  datosTemasImportantes    DatosTemasImportantes?
+
+  // Historial de cambios
+  historialEstatus         HistorialEstatus[]
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([status])
+  @@index([programa])
+  @@index([fechaRegistro])
+}
+
+model Productor {
+  id                    String   @id @default(uuid())
+  solicitud             Solicitud?
+  
+  nombre                String?
+  apellidoPaterno       String?
+  apellidoMaterno       String?
+  rfc                   String?
+  curp                  String?
+  tipoPersona           String   // FISICA, MORAL, GRUPO
+  nombreOrganizacion    String?
+  representante         String?
+  genero                String?
+  indigena              String   // SI, NO
+  etnia                 String?
+  discapacidad          String   // SI, NO
+  tipoDiscapacidad      String?
+  beneficiariosHombres  Int?
+  beneficiariosMujeres  Int?
+  tipoIdentificacion    String?
+  folioIdentificacion   String?
+  domicilio             String
+  telefono              String?
+  municipio             String
+  localidad             String
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([curp])
+  @@index([municipio])
+}
+
+model ApoyoControl {
+  id                  String   @id @default(uuid())
+  solicitud           Solicitud?
+
+  gradoMarginacion    String   // Muy Bajo, Bajo, Medio, Alto, Muy Alto
+  superficie          Decimal? @db.Decimal(12, 2)
+  tenenciaTierra      String   // Ejidal, Comunal, Mancomún, Propiedad Privada
+  conceptoApoyo       String
+  unidadMedida        String
+  cantidad            Decimal  @db.Decimal(12, 2)
+  especificacionApoyo String?
+  
+  montoTotal          Decimal  @db.Decimal(12, 2)
+  aportacionPrograma  Decimal  @db.Decimal(12, 2)
+  aportacionSolicitante Decimal @db.Decimal(12, 2)
+  aportacionEstatal   Decimal  @db.Decimal(12, 2)
+  aportacionFederal   Decimal  @db.Decimal(12, 2)
+  
+  estatus             String
+  priorizacion        String   // Baja, Media, Alta
+  dictamen            String   // Procedente, No Procedente, Sin Dictamen
+  comentarioDictamen  String?
+  sesionOd            String?
+  fechaSesionOd       DateTime?
+  factura             String?
+  proveedor           String?
+  rfcProveedor        String?
+  montoPagado         Decimal? @db.Decimal(12, 2)
+  economia            Decimal? @db.Decimal(12, 2)
+  fechaPago           DateTime?
+  trimestre           String   // Primer, Segundo, Tercero, Cuarto
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+// 1. Módulo Ganadería
+model DatosGanaderia {
+  id                String    @id @default(uuid())
+  solicitudId       String    @unique
+  solicitud         Solicitud @relation(fields: [solicitudId], references: [id], onDelete: Cascade)
+
+  nombrePredio      String
+  municipio         String
+  localidad         String
+  upp               String
+  latitudN          String
+  longitudW         String
+  credencialGanadera String?
+  inventarioGanadero String?
+
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+// 2. Módulo Agricultura Frijol
+model DatosAgriculturaFrijol {
+  id                          String    @id @default(uuid())
+  solicitudId                 String    @unique
+  solicitud                   Solicitud @relation(fields: [solicitudId], references: [id], onDelete: Cascade)
+
+  municipioActa               String
+  localidadActa               String?
+  fechaActa                   DateTime?
+  conceptoApoyo               String?
+  nombreProveedor             String?
+  representanteEmpresa        String?
+  nombreSupervisorGubernamental String?
+  variedadSemillaCertificada   String
+  cantidadAutorizadaKg        Decimal   @db.Decimal(12, 2)
+  superficieAutorizadaHa      Decimal   @db.Decimal(12, 2)
+  numeroBultos                Int?
+  tituloPropiedad             String?
+  enCasoOtroEspecificar       String?
+  numeroDocumento             String?
+
+  createdAt                   DateTime  @default(now())
+  updatedAt                   DateTime  @updatedAt
+}
+
+// 3. Módulo Pesca y Acuacultura
+model DatosPescaAcuacultura {
+  id                          String    @id @default(uuid())
+  solicitudId                 String    @unique
+  solicitud                   Solicitud @relation(fields: [solicitudId], references: [id], onDelete: Cascade)
+
+  domicilioUnidadProductiva   String
+  municipio                   String
+  localidad                   String
+  concesionAgua               String?
+  fechaPagoCria               DateTime?
+  permisoPesca                String?
+  actaConstitutiva            String?
+  fechaActaConstitutiva       DateTime?
+  rnpa                        String?
+  manifestacionImpactoAmbiental String?
+  resolucionProfepa           String?
+  legalPossesion              String?
+  facturaBienSustituir        String?
+
+  createdAt                   DateTime  @default(now())
+  updatedAt                   DateTime  @updatedAt
+}
+
+// 4. Módulo Infraestructura
+model DatosInfraestructura {
+  id                            String    @id @default(uuid())
+  solicitudId                   String    @unique
+  solicitud                     Solicitud @relation(fields: [solicitudId], references: [id], onDelete: Cascade)
+
+  domicilioUnidadDistritoRiego  String
+  municipio                     String
+  localidad                     String
+  concesionAgua                 String?
+  actaConstitutiva              String?
+  fechaActaConstitutiva         DateTime?
+
+  createdAt                     DateTime  @default(now())
+  updatedAt                     DateTime  @updatedAt
+}
+
+// 5. Módulo Centrales de Maquinaria
+model DatosMaquinaria {
+  id                  String    @id @default(uuid())
+  solicitudId         String    @unique
+  solicitud           Solicitud @relation(fields: [solicitudId], references: [id], onDelete: Cascade)
+
+  // Inventarios de maquinaria
+  tractor             String?
+  rastra              String?
+  sc                  String?
+  sp                  String?
+  rf                  String?
+  rg                  String?
+  en                  String?
+  em                  String?
+  cribadora           String?
+  b                   String?
+  mf                  String?
+  cg                  String?
+  niv                 String?
+  pps                 String?
+  otro                String?
+  
+  fechaSolicitada     DateTime?
+  ramaProductiva      String?
+  plazoSolicitado     String?
+  fecha1              String?
+  fecha2              String?
+  nombreContacto      String?
+  telefonoContacto    String?
+  transporte          String?
+
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+}
+
+// 6. Módulo Información para Medios (Página 12)
+model DatosMedios {
+  id                    String    @id @default(uuid())
+  solicitudId           String    @unique
+  solicitud             Solicitud @relation(fields: [solicitudId], references: [id], onDelete: Cascade)
+
+  subsecretaria         String
+  direccionDepartamento String?
+  tipoReporte           String
+  fecha                 DateTime
+  lugar                 String?
+  municipio             String?
+  localidad             String?
+  asuntoTema            String
+  quienesIntervienen    String?
+  reporteResumen        String    @db.Text
+  archivosMaterial      String?
+
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+}
+
+// 7. Módulo Temas Importantes (Página 13)
+model DatosTemasImportantes {
+  id                            String    @id @default(uuid())
+  solicitudId                   String    @unique
+  solicitud                     Solicitud @relation(fields: [solicitudId], references: [id], onDelete: Cascade)
+
+  tipo                          String
+  descripcion                   String
+  areaSeder                     String?
+  quienesIntervienen            String?
+  comoSeAtiende                 String    @db.Text
+  inversion                     String?
+  distribucion                  String?
+  productoresApoyados           String?
+  hectareasApoyadas             String?
+  beneficioAhorro               String?
+  municipiosApoyados            String?
+  reporteResumen                String    @db.Text
+  archivosMaterial              String?
+
+  createdAt                     DateTime  @default(now())
+  updatedAt                     DateTime  @updatedAt
+}
+
+// Trazabilidad de estatus
+model HistorialEstatus {
+  id             String    @id @default(uuid())
+  solicitudId    String
+  solicitud      Solicitud @relation(fields: [solicitudId], references: [id], onDelete: Cascade)
+  
+  estatus        String
+  comentario     String?
+  funcionario    String
+  fechaChange    DateTime  @default(now())
+
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([solicitudId])
+}
+
+// Configuración de presupuestos por sector
+model PresupuestoSector {
+  id            String   @id @default(uuid())
+  sector        String   @unique // GANADERIA, AGRICULTURA_FRIJOL, etc.
+  montoAsignado Decimal  @db.Decimal(12, 2)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
