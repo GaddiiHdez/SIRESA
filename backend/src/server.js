@@ -70,7 +70,7 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 // ─── Graceful Shutdown ─────────────────────────────────────
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
   logger.info(`==================================================`);
   logger.info(` Servidor de Desarrollo Rural Nayarit en ejecución`);
   logger.info(` - Puerto: ${PORT}`);
