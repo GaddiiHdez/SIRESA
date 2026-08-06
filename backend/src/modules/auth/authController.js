@@ -86,7 +86,7 @@ export async function login(req, res) {
         name: user.name,
       },
       JWT_SECRET,
-      { expiresIn: '8h' }  // El token expira después de 8 horas
+      { expiresIn: '10h' }  // El token expira después de 10 horas (jornada laboral completa)
     );
 
     // Devolver el token y los datos básicos del usuario al cliente

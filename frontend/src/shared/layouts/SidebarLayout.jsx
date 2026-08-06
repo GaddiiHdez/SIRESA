@@ -8,6 +8,8 @@ import CentroNotificacionesMenu from '../components/CentroNotificacionesMenu';
 import ExpedienteDetalleModal from '../../modules/solicitudes/components/ExpedienteDetalleModal';
 import { apiGetSolicitud, apiActualizarEstatus } from '../services/api';
 import { toast } from '../utils/toast';
+import { useSessionExpiry } from '../hooks/useSessionExpiry';
+import SessionExpiryModal from '../components/SessionExpiryModal';
 
 export default function SidebarLayout({ currentUser, onLogout, children }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -20,6 +22,17 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
   const [newEstatus, setNewEstatus] = useState('');
   const [estatusComentario, setEstatusComentario] = useState('');
   const [updateLoading, setUpdateLoading] = useState(false);
+
+  // ── Manejo de expiración de sesión ────────────────────────────────────────
+  // El hook monitorea el token JWT y activa el modal cuando está por expirar o ya expiró
+  const { sessionState, minutesLeft, dismissWarning } = useSessionExpiry(onLogout);
+
+  // Cuando el usuario renueva la sesión exitosamente desde el modal,
+  // actualiza los datos del usuario en el estado padre
+  const handleSessionRenewed = (newUser) => {
+    toast.success(`✅ Sesión renovada. Bienvenido de nuevo, ${newUser.name?.split(' ')[0] || newUser.username}.`, 5000);
+    dismissWarning();
+  };
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -91,7 +104,21 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
 
   return (
     <div className="h-screen w-screen flex bg-nayarit-light text-slate-700 overflow-hidden">
-      
+
+      {/* ── Modal de Expiración / Aviso de Sesión ────────────────────────────
+          Se muestra automáticamente cuando:
+          - sessionState='warning': la sesión expira en menos de 10 minutos
+          - sessionState='expired': el token ya expiró
+          En modo 'active' no renderiza nada. */}
+      <SessionExpiryModal
+        sessionState={sessionState}
+        minutesLeft={minutesLeft}
+        currentUser={currentUser}
+        onRenewed={handleSessionRenewed}
+        onLogout={onLogout}
+        onDismiss={sessionState === 'warning' ? dismissWarning : undefined}
+      />
+
       {/* BARRA LATERAL (SIDEBAR) */}
       <aside 
         className={`bg-gradient-to-b from-[#5E1232] via-[#480c25] to-[#200210] text-white flex flex-col justify-between shrink-0 p-4 shadow-xl hidden md:flex relative overflow-hidden h-full transition-all duration-300 ease-in-out ${

@@ -109,11 +109,23 @@ export function getCurrentUser() {
  * @returns {Promise<Object>} Datos de la respuesta JSON
  */
 async function handleResponse(res, errorMessage = 'Error en la solicitud.') {
-  // Token expirado o inválido: limpiar sesión y redirigir a login
+  // Token expirado o inválido: mostrar aviso y redirigir a login
+  // El SessionExpiryModal del SidebarLayout normalmente intercepta esto antes,
+  // pero si el token expiró mientras el sistema estaba inactivo en background,
+  // esta es la red de seguridad final.
   if (res.status === 401) {
     clearSession();
     if (window.location.pathname !== '/login') {
-      window.location.href = '/login';
+      // Disparar evento global para que el ToastContainer lo muestre
+      window.dispatchEvent(new CustomEvent('sdr-toast', {
+        detail: {
+          id: 'session-expired',
+          message: '🔒 Tu sesión ha expirado. Inicia sesión de nuevo para continuar.',
+          type: 'warning',
+          duration: 4000
+        }
+      }));
+      setTimeout(() => { window.location.href = '/login'; }, 1500);
     }
     throw new Error('Sesión no autorizada o token expirado. Por favor inicia sesión.');
   }
