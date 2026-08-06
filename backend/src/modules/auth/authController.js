@@ -1,41 +1,72 @@
+/**
+ * ============================================================
+ * Módulo de Autenticación — Controlador
+ * ============================================================
+ *
+ * Maneja las operaciones de inicio de sesión y verificación
+ * de la sesión activa del usuario.
+ *
+ * Endpoints que usa este controlador:
+ *  POST /api/auth/login → login()
+ *  GET  /api/auth/me    → me()
+ */
+
 import prisma from '../../shared/config/db.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
+// Clave secreta para firmar los tokens JWT.
+// DEBE coincidir con la usada en el middleware de autenticación.
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
   console.error('CRITICAL: JWT_SECRET no está configurado en las variables de entorno.');
 }
 
+/**
+ * POST /api/auth/login
+ *
+ * Flujo de autenticación:
+ *  1. Recibir username y password del cuerpo de la petición
+ *  2. Buscar el usuario en la base de datos por username
+ *  3. Comparar la contraseña con el hash bcrypt almacenado
+ *  4. Si coincide, generar y devolver un token JWT con los datos del usuario
+ *
+ * El token JWT contiene: id, username, role, name
+ * y expira en 8 horas (tiempo de jornada laboral estándar).
+ */
 export async function login(req, res) {
   const { username, password } = req.body;
 
+  // Validación básica: ambos campos son requeridos
   if (!username || !password) {
     res.status(400).json({ error: 'Usuario y contraseña son requeridos.' });
     return;
   }
 
   try {
+    // Buscar el usuario en la base de datos (búsqueda exacta por username)
     const user = await prisma.user.findUnique({
       where: { username },
     });
 
+    // Usuario no encontrado — devolver el mismo mensaje que "contraseña incorrecta"
+    // para no revelar si el username existe o no (seguridad por oscuridad)
     if (!user) {
       res.status(401).json({ error: 'Credenciales inválidas.' });
       return;
     }
 
-    let isMatch = await bcrypt.compare(password, user.passwordHash);
-    if (!isMatch && user.username === 'admin' && (password === 'admin123' || password === 'admin_nayarit_2026' || password === 'admin')) {
-      isMatch = true;
-    }
+    // Comparar la contraseña ingresada con el hash bcrypt almacenado en BD
+    // bcrypt.compare es resistente a timing attacks
+    const isMatch = await bcrypt.compare(password, user.passwordHash);
 
     if (!isMatch) {
       res.status(401).json({ error: 'Credenciales inválidas.' });
       return;
     }
 
-    // Asegurar que el usuario principal 'admin' tenga el rol SUPERADMIN
+    // Asegurar que el usuario 'admin' siempre tiene el rol SUPERADMIN.
+    // Esto corrige casos donde el seed pueda haberlo creado con otro rol.
     let effectiveRole = user.role;
     if (user.username === 'admin' && user.role !== 'SUPERADMIN') {
       effectiveRole = 'SUPERADMIN';
@@ -45,6 +76,8 @@ export async function login(req, res) {
       }).catch(err => console.error('Error al actualizar rol de admin:', err));
     }
 
+    // Generar el token JWT firmado con la clave secreta.
+    // El payload incluye los datos necesarios para autorizción y UI.
     const token = jwt.sign(
       {
         id: user.id,
@@ -53,9 +86,10 @@ export async function login(req, res) {
         name: user.name,
       },
       JWT_SECRET,
-      { expiresIn: '8h' }
+      { expiresIn: '8h' }  // El token expira después de 8 horas
     );
 
+    // Devolver el token y los datos básicos del usuario al cliente
     res.json({
       token,
       user: {
@@ -71,6 +105,16 @@ export async function login(req, res) {
   }
 }
 
+/**
+ * GET /api/auth/me
+ *
+ * Devuelve los datos del usuario actualmente autenticado.
+ * El middleware authMiddleware ya validó el token y puso
+ * el usuario en req.user antes de llegar aquí.
+ *
+ * Útil para que el frontend verifique si la sesión sigue activa
+ * al recargar la página.
+ */
 export async function me(req, res) {
   if (!req.user) {
     res.status(401).json({ error: 'No autenticado.' });
