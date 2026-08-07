@@ -92,7 +92,7 @@ export async function createSolicitud(data, user) {
     ineUrl, curpUrl, rfcUrl, comprobanteUrl, facturaUrl
   } = data;
 
-  return await prisma.$transaction(async (tx) => {
+  const result = await prisma.$transaction(async (tx) => {
     // ── Paso 0: Bloqueo exclusivo para serializar generación de folios ─────────
     // pg_advisory_xact_lock adquiere un bloqueo a nivel de transacción que se
     // libera automáticamente al terminar. El número 20260707 es un identificador
@@ -334,6 +334,11 @@ export async function createSolicitud(data, user) {
     // Devolver la solicitud base creada (sin los datos relacionados expandidos)
     return nuevaSolicitud;
   });
+
+  // Invalidar la caché del dashboard para reflejar el nuevo registro
+  clearStatsCache();
+
+  return result;
 }
 
 // ─── Listado con Filtros y Paginación ─────────────────────────────────────────
@@ -520,7 +525,7 @@ export async function updateSolicitudEstatus(id, estatus, comentario, user) {
   }
 
   // Ejecutar el cambio de estatus en una transacción para garantizar consistencia
-  return await prisma.$transaction(async (tx) => {
+  const result = await prisma.$transaction(async (tx) => {
     // Actualizar el estatus de la solicitud
     const solActualizada = await tx.solicitud.update({
       where: { id },
@@ -547,6 +552,9 @@ export async function updateSolicitudEstatus(id, estatus, comentario, user) {
 
     return solActualizada;
   });
+
+  clearStatsCache();
+  return result;
 }
 
 // ─── Actualización de Documentos ───────────────────────────────────────────────
@@ -573,22 +581,31 @@ export async function updateSolicitudDocumentos(id, documents) {
   });
 }
 
+// ─── Cache de Estadísticas ───────────────────────────────────────────────────
+let statsCache = { data: null, timestamp: 0 };
+const STATS_CACHE_TTL = 3 * 60 * 1000; // TTL: 3 minutos en milisegundos
+
+/**
+ * Invalida la caché del dashboard cuando se realizan cambios en solicitudes
+ */
+export function clearStatsCache() {
+  statsCache = { data: null, timestamp: 0 };
+}
+
 // ─── Estadísticas del Dashboard ────────────────────────────────────────────────
 
 /**
  * Genera las estadísticas agregadas para el dashboard principal.
- *
- * Ejecuta múltiples consultas para obtener:
- *  - Totales de solicitudes e inversión
- *  - Desglose por género y tipo de persona (beneficiarios)
- *  - Distribución por estatus (gráfica de dona)
- *  - Inversión y conteo por módulo productivo (ganadería, pesca, etc.)
- *  - Comparación con presupuesto asignado por sector
- *  - Top municipios por inversión con sus localidades
+ * Utiliza caché en memoria con TTL de 3 minutos para optimizar el rendimiento.
  *
  * @returns {Promise<Object>} Objeto con todas las estadísticas
  */
 export async function getStatsDashboard() {
+  const now = Date.now();
+  if (statsCache.data && (now - statsCache.timestamp < STATS_CACHE_TTL)) {
+    return statsCache.data;
+  }
+
   // Total de expedientes registrados en el sistema
   const totalSolicitudes = await prisma.solicitud.count();
 
@@ -684,7 +701,7 @@ export async function getStatsDashboard() {
     localidades: localidadInversiones.filter(l => l.municipio === m.municipio)
   }));
 
-  return {
+  const result = {
     resumen: {
       totalSolicitudes,
       inversionTotal: sumas._sum.montoTotal || 0,
@@ -700,6 +717,9 @@ export async function getStatsDashboard() {
     modulos: modulosConPresupuesto,
     municipios: municipiosConLocalidades
   };
+
+  statsCache = { data: result, timestamp: Date.now() };
+  return result;
 }
 
 // ─── Padrón de Productores ─────────────────────────────────────────────────────

@@ -30,11 +30,21 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
  */
 export function getFileUrl(path) {
   if (!path) return '';
-  // Si ya es una URL absoluta, devolverla sin modificar
-  if (path.startsWith('http://') || path.startsWith('https://')) return path;
-  // Quitar el sufijo /api de la URL base para obtener la raíz del servidor
-  const baseUrl = API_URL.replace(/\/api\/?$/, '');
-  return `${baseUrl}${path.startsWith('/') ? '' : '/'}${path}`;
+  // Si ya es una URL absoluta HTTP(S), verificar si necesita token
+  let fullUrl = path;
+  if (!path.startsWith('http://') && !path.startsWith('https://')) {
+    const baseUrl = API_URL.replace(/\/api\/?$/, '');
+    fullUrl = `${baseUrl}${path.startsWith('/') ? '' : '/'}${path}`;
+  }
+
+  // Si la URL apunta a /uploads/ y el usuario tiene token de sesión, adjuntar ?token= para autenticación estática
+  const token = getToken();
+  if (token && fullUrl.includes('/uploads/') && !fullUrl.includes('token=')) {
+    const separator = fullUrl.includes('?') ? '&' : '?';
+    fullUrl = `${fullUrl}${separator}token=${encodeURIComponent(token)}`;
+  }
+
+  return fullUrl;
 }
 
 // ─── Gestión de Token y Sesión ─────────────────────────────────────────────────

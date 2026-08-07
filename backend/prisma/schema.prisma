@@ -57,6 +57,7 @@ model Solicitud {
 
   @@index([status])
   @@index([programa])
+  @@index([moduloTipo])
   @@index([fechaRegistro])
 }
 

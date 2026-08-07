@@ -5,18 +5,23 @@
  * ============================================================
  *
  * Este archivo inicializa y configura el servidor Express:
- *  - Middlewares de seguridad (Helmet, CORS)
+ *  - Validación Fail-Fast de Variables de Entorno (A-7)
+ *  - Middlewares de seguridad (Helmet, CORS, Rate Limiting)
  *  - Parseo de solicitudes JSON
  *  - Montaje de todas las rutas de la API
- *  - Servicio de archivos estáticos (PDFs/imágenes subidos)
+ *  - Servicio protegido de archivos estáticos (C-4)
+ *  - Health Check con prueba de conectividad a PostgreSQL (B-3)
  *  - Manejadores de errores globales
  *  - Graceful Shutdown (apagado limpio con cierre del pool de BD)
  */
 
 import path from 'path';
+import fs from 'fs';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import jwt from 'jsonwebtoken';
 import * as dotenv from 'dotenv';
 
 // Importación de módulos de rutas por dominio de negocio
@@ -30,14 +35,25 @@ import userRoutes from './modules/users/userRoutes.js';
 // Manejadores globales de errores HTTP
 import { errorHandler, notFoundHandler } from './shared/middleware/errorHandler.js';
 
-// Pool de conexiones de PostgreSQL (para el Graceful Shutdown)
+// Pool de conexiones de PostgreSQL (para Health Check y Graceful Shutdown)
 import { pool } from './shared/config/db.js';
 
 // Logger estructurado
 import logger from './shared/utils/logger.js';
 
-// Cargar variables de entorno desde el archivo .env (solo en desarrollo)
+// Cargar variables de entorno desde el archivo .env
 dotenv.config();
+
+// ─── A-7: Validación Fail-Fast de Variables de Entorno ───────────────────────
+// Verificar que las variables de entorno críticas estén configuradas antes de arrancar el servidor
+const REQUIRED_ENV_VARS = ['DATABASE_URL', 'JWT_SECRET'];
+const missingEnvVars = REQUIRED_ENV_VARS.filter(key => !process.env[key]);
+
+if (missingEnvVars.length > 0) {
+  logger.error(`CRITICAL: Faltan variables de entorno requeridas: ${missingEnvVars.join(', ')}`);
+  logger.error('El servidor no puede arrancar sin estas configuraciones.');
+  process.exit(1);
+}
 
 const app = express();
 
@@ -46,17 +62,11 @@ const PORT = process.env.PORT || 5000;
 
 // ─── Seguridad HTTP ────────────────────────────────────────────────────────────
 // Helmet agrega cabeceras HTTP de seguridad automáticamente (XSS, HSTS, etc.)
-// Se desactiva crossOriginResourcePolicy para permitir que el frontend
-// acceda a los archivos estáticos de /uploads directamente (PDFs, imágenes)
 app.use(helmet({
   crossOriginResourcePolicy: false
 }));
 
 // ─── CORS (Cross-Origin Resource Sharing) ─────────────────────────────────────
-// Define qué dominios externos pueden hacer peticiones a esta API.
-// Se lee la lista de orígenes permitidos desde la variable de entorno CORS_ORIGINS.
-// Si CORS_ORIGINS='*', cualquier origen puede acceder (útil para demos/desarrollo).
-// En producción se recomienda especificar el dominio exacto del frontend.
 const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173')
   .split(',')
   .map(o => o.trim());
@@ -74,20 +84,27 @@ app.use(cors({
       return callback(null, true);
     }
 
-    // Rechazar cualquier otro origen no reconocido
     callback(new Error(`Origen ${origin} no permitido por CORS.`));
   },
-  credentials: true // Permite envío de cookies y cabeceras de autorización
+  credentials: true
 }));
 
-// ─── Parseo de cuerpo JSON ─────────────────────────────────────────────────────
-// Limita el tamaño del body a 1MB para prevenir ataques de denegación de servicio
-// que intenten enviar payloads extremadamente grandes.
-app.use(express.json({ limit: '1mb' }));
+// ─── B-4: Rate Limiting General para la API ────────────────────────────────────
+// Limitar peticiones masivas por IP para prevenir ataques DoS
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 300,                 // Máximo 300 peticiones por ventana de 15 min por IP
+  message: { error: 'Demasiadas peticiones desde esta IP. Intenta de nuevo más tarde.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use('/api/', globalLimiter);
+
+// ─── B-7: Parseo de cuerpo JSON restringido ────────────────────────────────────
+// Limita el tamaño del body a 100kb para prevenir ataques de denegación de servicio
+app.use(express.json({ limit: '100kb' }));
 
 // ─── Rutas de la API ───────────────────────────────────────────────────────────
-// Cada módulo de negocio tiene su propio conjunto de rutas aisladas.
-// El prefijo /api/* es estándar para distinguir la API REST del frontend estático.
 app.use('/api/auth', authRoutes);           // Login, verificación de sesión
 app.use('/api/catalogos', catalogoRoutes);  // Municipios, localidades y listas de catálogos
 app.use('/api/solicitudes', solicitudRoutes); // CRUD de expedientes y trámites
@@ -95,31 +112,70 @@ app.use('/api/upload', uploadRoutes);       // Subida de archivos PDF e imágene
 app.use('/api/presupuestos', presupuestoRoutes); // Gestión de presupuestos sectoriales
 app.use('/api/users', userRoutes);          // Gestión de usuarios del sistema (RBAC)
 
-// ─── Archivos Estáticos ────────────────────────────────────────────────────────
-// Sirve los archivos subidos (PDFs, imágenes) desde la carpeta /uploads.
-// Las URLs de acceso quedan como: GET /uploads/<nombre-del-archivo>
-// NOTA DE SEGURIDAD: Actualmente son públicos. En producción, proteger con authMiddleware.
-app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+// ─── C-4: Servicio Protegido de Archivos Estáticos ─────────────────────────────
+// Los archivos subidos (PDFs, imágenes) solo son accesibles si el cliente presenta
+// un token JWT válido (ya sea en el header Authorization o via parámetro query ?token=)
+app.get('/uploads/:filename', (req, res) => {
+  const filename = path.basename(req.params.filename); // Prevenir Path Traversal
+  const filePath = path.join(process.cwd(), 'uploads', filename);
 
-// ─── Health Check ─────────────────────────────────────────────────────────────
-// Endpoint simple para que Railway/Render/monitores verifiquen que el servidor está vivo.
-app.get('/health', (_req, res) => {
-  res.json({
-    status: 'ok',
-    timestamp: new Date(),
-    message: 'Servidor SIRESA operando correctamente.'
-  });
+  // Extraer token desde header Authorization o parametro URL ?token=
+  const authHeader = req.headers.authorization;
+  let token = null;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    token = authHeader.split(' ')[1];
+  } else if (req.query.token) {
+    token = req.query.token;
+  }
+
+  if (!token) {
+    res.status(401).json({ error: 'Acceso denegado. Se requiere autenticación para ver los archivos.' });
+    return;
+  }
+
+  try {
+    jwt.verify(token, process.env.JWT_SECRET);
+  } catch (err) {
+    res.status(403).json({ error: 'Token inválido o expirado para acceder al archivo.' });
+    return;
+  }
+
+  // Verificar existencia del archivo
+  if (!fs.existsSync(filePath)) {
+    res.status(404).json({ error: 'Archivo no encontrado.' });
+    return;
+  }
+
+  res.sendFile(filePath);
+});
+
+// ─── B-3: Health Check con Prueba de Conexión a Base de Datos ──────────────────
+app.get('/health', async (_req, res) => {
+  try {
+    // Probar conectividad real con PostgreSQL ejecutando SELECT 1
+    await pool.query('SELECT 1');
+    res.json({
+      status: 'ok',
+      db: 'connected',
+      timestamp: new Date(),
+      message: 'Servidor SIRESA y Base de Datos operando correctamente.'
+    });
+  } catch (error) {
+    logger.error('Health Check falló al verificar la base de datos:', error);
+    res.status(500).json({
+      status: 'error',
+      db: 'disconnected',
+      timestamp: new Date(),
+      message: 'El servidor está activo pero no puede comunicarse con PostgreSQL.'
+    });
+  }
 });
 
 // ─── Manejo de Errores ─────────────────────────────────────────────────────────
-// notFoundHandler: captura rutas que no existen → responde con 404
-// errorHandler: captura cualquier error lanzado en los controladores → responde con 5xx o error específico
 app.use(notFoundHandler);
 app.use(errorHandler);
 
 // ─── Inicio del Servidor ───────────────────────────────────────────────────────
-// Se escucha en '0.0.0.0' para que Railway y otros entornos containerizados
-// puedan enrutar el tráfico al servidor (no solo localhost).
 const server = app.listen(PORT, '0.0.0.0', () => {
   logger.info(`==================================================`);
   logger.info(` Servidor SIRESA — Secretaría de Desarrollo Rural`);
@@ -130,9 +186,6 @@ const server = app.listen(PORT, '0.0.0.0', () => {
 });
 
 // ─── Graceful Shutdown ─────────────────────────────────────────────────────────
-// Cuando el sistema operativo envía SIGTERM (Railway, Docker) o SIGINT (Ctrl+C),
-// el servidor termina de procesar las peticiones en vuelo, cierra el pool de
-// conexiones de PostgreSQL limpiamente y luego termina el proceso.
 function gracefulShutdown(signal) {
   logger.info(`${signal} recibido. Cerrando servidor HTTP...`);
   server.close(async () => {
@@ -146,7 +199,6 @@ function gracefulShutdown(signal) {
     process.exit(0);
   });
 
-  // Fuerza el cierre si el apagado limpio tarda más de 10 segundos
   setTimeout(() => process.exit(1), 10000);
 }
 

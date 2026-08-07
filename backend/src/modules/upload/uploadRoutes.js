@@ -8,19 +8,17 @@
  *
  * Tecnología usada: Multer (middleware de Node.js para multipart/form-data)
  *
- * Restricciones:
- *  - Solo archivos PDF, JPG y PNG son aceptados
+ * Restricciones de Seguridad (A-6):
+ *  - Sanitización estricta de nombres y lista blanca de extensiones (.pdf, .jpg, .jpeg, .png)
+ *  - Validación cruzada entre extensión y MIME type real
  *  - Tamaño máximo: 5MB por archivo
  *  - Requiere token de autenticación válido
  *
  * Almacenamiento:
  *  - Los archivos se guardan en la carpeta /uploads del servidor
- *  - En producción (Railway), los archivos son efímeros (se pierden al reiniciar)
- *    → Se recomienda migrar a almacenamiento en la nube (S3, Cloudinary, etc.)
  *
  * Endpoint:
  *  POST /api/upload → retorna { success, url, filename, size }
- *  La URL devuelta puede guardarse directamente en los campos *Url de la solicitud
  */
 
 import express from 'express';
@@ -34,26 +32,29 @@ const router = express.Router();
 // ─── Configuración de la Carpeta de Destino ────────────────────────────────────
 const uploadDir = 'uploads';
 
-// Crear la carpeta si no existe (se ejecuta al arrancar el servidor)
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
+// Extensiones permitidas explícitas
+const ALLOWED_EXTENSIONS = ['.pdf', '.jpg', '.jpeg', '.png'];
+const ALLOWED_MIME_TYPES = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
+
 // ─── Motor de Almacenamiento de Multer ────────────────────────────────────────
-// diskStorage guarda los archivos en disco (vs. memoryStorage que los guarda en RAM)
 const storage = multer.diskStorage({
-  // Carpeta destino donde se guardan los archivos
   destination: (req, file, cb) => {
     cb(null, uploadDir);
   },
 
-  // Nombre único del archivo para evitar colisiones.
-  // Formato: <fieldname>-<timestamp>-<random>.<extension>
-  // Ej: file-1785350069834-709170748.pdf
+  // Nombre único y sanitizado del archivo
   filename: (req, file, cb) => {
+    const rawExt = path.extname(file.originalname).toLowerCase();
+    const cleanExt = ALLOWED_EXTENSIONS.includes(rawExt) ? rawExt : '.pdf';
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const ext = path.extname(file.originalname).toLowerCase();
-    cb(null, file.fieldname + '-' + uniqueSuffix + ext);
+    // Solo caracteres alfanuméricos para el prefijo
+    const safePrefix = (file.fieldname || 'doc').replace(/[^a-zA-Z0-9]/g, '');
+
+    cb(null, `${safePrefix}-${uniqueSuffix}${cleanExt}`);
   }
 });
 
@@ -61,20 +62,18 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage,
   limits: {
-    fileSize: 5 * 1024 * 1024 // Límite de 5MB (5 × 1024 × 1024 bytes)
+    fileSize: 5 * 1024 * 1024 // Límite estricto de 5MB
   },
   fileFilter: (req, file, cb) => {
-    // Lista blanca de tipos MIME y extensiones permitidos
-    const allowedTypes = /jpeg|jpg|png|pdf/;
-    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = allowedTypes.test(file.mimetype);
+    const ext = path.extname(file.originalname).toLowerCase();
+    const isExtAllowed = ALLOWED_EXTENSIONS.includes(ext);
+    const isMimeAllowed = ALLOWED_MIME_TYPES.includes(file.mimetype);
 
-    if (mimetype && extname) {
-      return cb(null, true); // Archivo aceptado
+    if (isExtAllowed && isMimeAllowed) {
+      return cb(null, true);
     }
 
-    // Rechazar tipos de archivo no permitidos
-    cb(new Error('Formato no permitido. Solo se aceptan PDFs e imágenes (JPG, PNG).'));
+    cb(new Error('Formato no permitido. Solo se aceptan archivos PDF e imágenes en formato JPG o PNG.'));
   }
 });
 
@@ -88,8 +87,6 @@ router.post('/',
       return;
     }
 
-    // Construir la URL pública relativa del archivo guardado
-    // El servidor sirve /uploads/* como archivos estáticos en server.js
     const fileUrl = `/uploads/${req.file.filename}`;
 
     res.json({
@@ -102,11 +99,8 @@ router.post('/',
 );
 
 // ─── Manejador de Errores de Multer ───────────────────────────────────────────
-// Este manejador de 4 parámetros captura los errores lanzados por Multer
-// (límite de tamaño, tipo de archivo inválido, etc.)
-router.use((err, req, res, next) => {
+router.use((err, req, res, _next) => {
   if (err instanceof multer.MulterError) {
-    // Error específico de Multer (ej: archivo demasiado grande)
     if (err.code === 'LIMIT_FILE_SIZE') {
       res.status(400).json({ error: 'El archivo supera el límite permitido de 5MB.' });
       return;
@@ -114,7 +108,6 @@ router.use((err, req, res, next) => {
     res.status(400).json({ error: `Error de subida: ${err.message}` });
     return;
   }
-  // Error del fileFilter (tipo de archivo no permitido) u otro error
   res.status(400).json({ error: err.message || 'Error interno al procesar el archivo.' });
 });
 

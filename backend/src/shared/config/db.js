@@ -40,7 +40,7 @@ const isProduction = process.env.NODE_ENV === 'production' ||
 // Esto es mucho más eficiente que abrir/cerrar una conexión por cada petición.
 const pool = new pg.Pool({
   connectionString,
-  max: 20,                    // Máximo de conexiones simultáneas (reducir a 5 en Railway free tier)
+  max: process.env.DB_POOL_MAX ? parseInt(process.env.DB_POOL_MAX) : (isProduction ? 10 : 20),
   idleTimeoutMillis: 30000,   // Cerrar conexiones inactivas después de 30 segundos
   connectionTimeoutMillis: 5000, // Devolver error si una conexión tarda más de 5 segundos
 

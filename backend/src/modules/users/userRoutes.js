@@ -21,8 +21,8 @@ import { Router } from 'express';
 import { getUsers, createUser, updateUser, deleteUser } from './userController.js';
 import { authMiddleware } from '../../shared/middleware/auth.js';
 import { requireRole } from '../../shared/middleware/rbac.js';
-import { validate } from '../../shared/middleware/validate.js';
-import { createUserSchema, updateUserSchema } from './userSchemas.js';
+import { validate, validateParams } from '../../shared/middleware/validate.js';
+import { createUserSchema, updateUserSchema, userIdParamSchema } from './userSchemas.js';
 
 const router = Router();
 
@@ -31,9 +31,9 @@ const router = Router();
 router.use(authMiddleware);
 router.use(requireRole('SUPERADMIN', 'ADMINISTRADOR'));
 
-router.get('/', getUsers);                              // Listar usuarios
-router.post('/', validate(createUserSchema), createUser); // Crear usuario (valida body)
-router.put('/:id', validate(updateUserSchema), updateUser); // Actualizar usuario (valida body)
-router.delete('/:id', deleteUser);                     // Eliminar usuario
+router.get('/', getUsers);                                                      // Listar usuarios
+router.post('/', validate(createUserSchema), createUser);                        // Crear usuario (valida body)
+router.put('/:id', validateParams(userIdParamSchema), validate(updateUserSchema), updateUser); // Actualizar usuario
+router.delete('/:id', validateParams(userIdParamSchema), deleteUser);             // Eliminar usuario
 
 export default router;
