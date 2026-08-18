@@ -41,6 +41,7 @@ const EstadisticasPage         = lazy(() => import('./modules/dashboard/pages/Es
 const NuevaSolicitudPage       = lazy(() => import('./modules/solicitudes/pages/NuevaSolicitudPage'));
 const ConsultaExpedientesPage  = lazy(() => import('./modules/solicitudes/pages/ConsultaExpedientesPage'));
 const ProductoresPage          = lazy(() => import('./modules/productores/pages/ProductoresPage'));
+const GeodirectorioPage        = lazy(() => import('./modules/directorio/pages/GeodirectorioPage'));
 const ConfiguracionUsuariosPage = lazy(() => import('./modules/admin/pages/ConfiguracionUsuariosPage'));
 
 // ─── Componente de Carga ───────────────────────────────────────────────────────
@@ -180,8 +181,11 @@ export default function App() {
                     {/* Consulta y búsqueda de expedientes */}
                     <Route path="/consultar" element={<ConsultaExpedientesPage />} />
 
-                    {/* Padrón de productores con mapa de Nayarit */}
+                    {/* Padrón de productores */}
                     <Route path="/productores" element={<ProductoresPage />} />
+
+                    {/* Geodirectorio y Visor Cartográfico */}
+                    <Route path="/directorio" element={<GeodirectorioPage />} />
 
                     {/* Gestión de usuarios — solo SUPERADMIN y ADMINISTRADOR */}
                     <Route

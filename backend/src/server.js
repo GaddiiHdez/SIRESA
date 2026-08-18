@@ -31,6 +31,7 @@ import solicitudRoutes from './modules/solicitudes/solicitudRoutes.js';
 import uploadRoutes from './modules/upload/uploadRoutes.js';
 import presupuestoRoutes from './modules/presupuestos/presupuestoRoutes.js';
 import userRoutes from './modules/users/userRoutes.js';
+import directorioRoutes from './modules/directorio/directorioRoutes.js';
 
 // Manejadores globales de errores HTTP
 import { errorHandler, notFoundHandler } from './shared/middleware/errorHandler.js';
@@ -111,6 +112,7 @@ app.use('/api/solicitudes', solicitudRoutes); // CRUD de expedientes y trámites
 app.use('/api/upload', uploadRoutes);       // Subida de archivos PDF e imágenes
 app.use('/api/presupuestos', presupuestoRoutes); // Gestión de presupuestos sectoriales
 app.use('/api/users', userRoutes);          // Gestión de usuarios del sistema (RBAC)
+app.use('/api/directorio', directorioRoutes); // Módulo de Geodirectorio y Visor Cartográfico
 
 // ─── C-4: Servicio Protegido de Archivos Estáticos ─────────────────────────────
 // Los archivos subidos (PDFs, imágenes) solo son accesibles si el cliente presenta

@@ -443,3 +443,18 @@ export async function apiEliminarUsuario(id) {
   });
   return handleResponse(res, 'Error al eliminar usuario.');
 }
+
+// ─── Geodirectorio y Visor Cartográfico ───────────────────────────────────────
+
+/**
+ * Obtiene los puntos geográficos procesados para el mapa del Geodirectorio.
+ * @param {Object} filters - Filtros (search, tipo, municipio)
+ * @returns {Promise<{totalPuntos: number, puntos: Array}>} Datos geográficos
+ */
+export async function apiGetDirectorioGeo(filters = {}) {
+  const query = new URLSearchParams(filters).toString();
+  const res = await fetch(`${API_URL}/directorio/geo?${query}`, {
+    headers: getAuthHeaders()
+  });
+  return handleResponse(res, 'Error al obtener datos cartográficos del Geodirectorio.');
+}

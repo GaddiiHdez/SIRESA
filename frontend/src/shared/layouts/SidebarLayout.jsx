@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BarChart3, FileSpreadsheet, PlusCircle, LogOut, ShieldCheck, User, Menu, ChevronLeft, Sparkles, X, Users, PieChart, Search } from 'lucide-react';
+import { BarChart3, FileSpreadsheet, PlusCircle, LogOut, ShieldCheck, User, Menu, ChevronLeft, Sparkles, X, Users, PieChart, Search, Compass } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { formatModulo } from '../utils/formatters';
 import { getSectorIcon } from '../config/sectoresMetadata';
@@ -230,6 +230,17 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
                   <Users className={`w-4.5 h-4.5 shrink-0 ${currentPath === '/productores' ? 'text-nayarit-gold' : 'text-slate-300'}`} />
                   Padrón de Productores
                 </button>
+                <button
+                  onClick={() => navigate('/directorio')}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-smooth border-l-4 ${
+                    currentPath === '/directorio'
+                      ? 'bg-gradient-to-r from-[#C29A52]/35 via-[#C29A52]/10 to-transparent text-white border-l-nayarit-gold shadow-sm'
+                      : 'hover:bg-white/5 text-slate-300 hover:text-white border-l-transparent'
+                  }`}
+                >
+                  <Compass className={`w-4.5 h-4.5 shrink-0 ${currentPath === '/directorio' ? 'text-nayarit-gold' : 'text-slate-300'}`} />
+                  Geodirectorio Rural
+                </button>
                 {(currentUser?.role === 'SUPERADMIN' || currentUser?.role === 'ADMINISTRADOR') && (
                   <button
                     onClick={() => navigate('/usuarios')}
@@ -303,6 +314,17 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
                   }`}
                 >
                   <Users className={`w-5 h-5 ${currentPath === '/productores' ? 'text-nayarit-gold' : 'text-slate-300'}`} />
+                </button>
+                <button
+                  onClick={() => navigate('/directorio')}
+                  title="Geodirectorio Rural"
+                  className={`w-12 h-12 flex items-center justify-center rounded-xl transition-smooth border-l-4 ${
+                    currentPath === '/directorio'
+                      ? 'bg-gradient-to-r from-[#C29A52]/35 to-transparent text-white border-l-nayarit-gold shadow-sm'
+                      : 'hover:bg-white/5 text-slate-300 hover:text-white border-l-transparent'
+                  }`}
+                >
+                  <Compass className={`w-5 h-5 ${currentPath === '/directorio' ? 'text-nayarit-gold' : 'text-slate-300'}`} />
                 </button>
                 {(currentUser?.role === 'SUPERADMIN' || currentUser?.role === 'ADMINISTRADOR') && (
                   <button
