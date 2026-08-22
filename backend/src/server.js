@@ -32,6 +32,7 @@ import uploadRoutes from './modules/upload/uploadRoutes.js';
 import presupuestoRoutes from './modules/presupuestos/presupuestoRoutes.js';
 import userRoutes from './modules/users/userRoutes.js';
 import directorioRoutes from './modules/directorio/directorioRoutes.js';
+import { autoDeduplicateProductores } from './modules/solicitudes/solicitudService.js';
 
 // Manejadores globales de errores HTTP
 import { errorHandler, notFoundHandler } from './shared/middleware/errorHandler.js';
@@ -185,6 +186,9 @@ const server = app.listen(PORT, '0.0.0.0', () => {
   logger.info(` - URL local: http://localhost:${PORT}`);
   logger.info(` - Orígenes CORS permitidos: ${allowedOrigins.join(', ')}`);
   logger.info(`==================================================`);
+
+  // Ejecutar consolidación y desduplicación automática del padrón en la base de datos
+  autoDeduplicateProductores();
 });
 
 // ─── Graceful Shutdown ─────────────────────────────────────────────────────────

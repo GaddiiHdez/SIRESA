@@ -801,3 +801,48 @@ export async function buscarProductorByCurpOrRfc(queryStr) {
     }
   });
 }
+
+/**
+ * Tarea automática ejecutada al arrancar el servidor para consolidar y fusionar
+ * cualquier registro de productor duplicado existente en la base de datos (PostgreSQL).
+ */
+export async function autoDeduplicateProductores() {
+  try {
+    const todos = await prisma.productor.findMany({
+      include: { solicitudes: true },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    const grupos = {};
+    todos.forEach(p => {
+      const key = (p.curp?.trim() || p.rfc?.trim())?.toUpperCase();
+      if (key && key.length >= 10) {
+        if (!grupos[key]) grupos[key] = [];
+        grupos[key].push(p);
+      }
+    });
+
+    let mergedCount = 0;
+    for (const [key, lista] of Object.entries(grupos)) {
+      if (lista.length > 1) {
+        const principal = lista[0];
+        const duplicados = lista.slice(1);
+
+        for (const dup of duplicados) {
+          await prisma.solicitud.updateMany({
+            where: { productorId: dup.id },
+            data: { productorId: principal.id }
+          });
+          await prisma.productor.delete({ where: { id: dup.id } });
+          mergedCount++;
+        }
+      }
+    }
+
+    if (mergedCount > 0) {
+      console.log(`[AUTO-DEDUPLICATION] ✅ Se consolidaron ${mergedCount} registros duplicados en la base de datos.`);
+    }
+  } catch (err) {
+    console.error('[AUTO-DEDUPLICATION] Error al ejecutar desduplicación automática:', err);
+  }
+}
