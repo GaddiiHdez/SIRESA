@@ -201,48 +201,60 @@ export default function DashboardPage() {
     <div className="space-y-6 animate-fadeIn pb-12">
       
       {/* ── 1. HERO OPERATIVO Y BIENVENIDA ────────────────────────────────────────── */}
-      <div className="bg-gradient-to-r from-nayarit-burgundy via-[#4A0D26] to-slate-900 text-white rounded-3xl p-6 md:p-8 shadow-xl relative overflow-hidden">
-        {/* Decoración geométrica institucional */}
-        <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-white/5 skew-x-12 pointer-events-none" />
+      <div className="bg-[#480C25] bg-gradient-to-br from-[#480C25] via-[#380A1D] to-[#0F172A] text-white rounded-3xl p-6 md:p-8 shadow-2xl border border-white/10 relative overflow-hidden">
         
         <div className="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
           
-          {/* Saludo y Resumen */}
-          <div className="space-y-2 max-w-2xl">
-            <div className="flex items-center gap-2 text-xs font-bold text-amber-400 uppercase tracking-widest">
-              <Sparkles size={14} />
+          {/* Saludo y Resumen con Tipografía Nítida de Alto Contraste */}
+          <div className="space-y-2.5 max-w-2xl">
+            <div className="flex items-center gap-2 text-xs font-extrabold text-[#C29A52] uppercase tracking-widest">
+              <Sparkles size={14} className="text-[#C29A52]" />
               <span>{getFechaFormateada()}</span>
             </div>
 
-            <h1 className="text-2xl md:text-3xl font-extrabold text-white leading-tight">
+            <h1 className="text-2xl md:text-3xl font-black text-white leading-tight tracking-tight drop-shadow-sm">
               {getSaludo()}, {currentUser?.name?.split(' ')[0] || 'Administrador'} 👋
             </h1>
 
-            <p className="text-xs md:text-sm text-slate-300 font-medium leading-relaxed">
-              Actualmente tienes <strong className="text-amber-300 font-bold">{pendientes.length} expediente(s) pendientes de atención</strong> en el flujo de validación y dictamen de la Secretaría.
+            <p className="text-xs md:text-sm text-slate-200 font-medium leading-relaxed">
+              Actualmente tienes <strong className="text-[#FBBF24] font-extrabold">{pendientes.length} expediente(s) pendientes de atención</strong> en el flujo de validación y dictamen de la Secretaría.
             </p>
           </div>
 
-          {/* Buscador Rápido de Expediente */}
-          <div className="w-full lg:w-96">
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+          {/* Acciones Rápidas: Botón Nueva Solicitud + Buscador de Expedientes */}
+          <div className="w-full lg:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            
+            {/* Botón de Acceso Rápido: Nueva Solicitud */}
+            {currentUser?.role !== 'ANALISTA' && (
+              <button
+                onClick={() => navigate('/registrar')}
+                className="py-3 px-5 bg-[#C29A52] hover:bg-[#b08b47] text-slate-950 rounded-2xl font-black text-xs flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-xl hover:scale-[1.02] cursor-pointer shrink-0"
+              >
+                <PlusCircle size={16} className="text-slate-950 stroke-[2.5]" />
+                <span>Nueva Solicitud</span>
+              </button>
+            )}
+
+            {/* Buscador Rápido de Expediente */}
+            <div className="relative w-full sm:w-72 md:w-80">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
               <input
                 type="text"
                 value={quickSearch}
                 onChange={(e) => setQuickSearch(e.target.value)}
                 placeholder="Buscar folio, CURP o productor..."
-                className="w-full pl-11 pr-4 py-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl text-xs font-semibold text-white placeholder-slate-400 outline-none focus:bg-white focus:text-slate-900 focus:border-white transition-all shadow-inner"
+                className="w-full pl-10 pr-4 py-3 bg-white/10 hover:bg-white/15 focus:bg-white focus:text-slate-900 focus:placeholder-slate-500 border border-white/20 rounded-2xl text-xs font-semibold text-white placeholder-slate-300 outline-none focus:border-white transition-all shadow-sm"
               />
               {quickSearch && (
                 <button
                   onClick={() => setQuickSearch('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xs font-bold bg-white/10 px-2 py-0.5 rounded-lg"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-[10px] font-bold bg-white/10 px-2 py-0.5 rounded-lg"
                 >
                   Limpiar
                 </button>
               )}
             </div>
+
           </div>
 
         </div>
