@@ -99,35 +99,59 @@ export async function createSolicitud(data, user) {
     // arbitrario único para este tipo de operación en el sistema.
     await tx.$executeRaw`SELECT pg_advisory_xact_lock(20260707)`;
 
-    // ── Paso 1: Crear Productor ────────────────────────────────────────────────
+    // ── Paso 1: Reutilizar o Crear Productor ────────────────────────────────────
     let nuevoProductor = null;
     if (productor) {
-      nuevoProductor = await tx.productor.create({
-        data: {
-          tipoPersona: productor.tipoPersona,
-          nombre: nn(productor.nombre),
-          apellidoPaterno: nn(productor.apellidoPaterno),
-          apellidoMaterno: nn(productor.apellidoMaterno),
-          nombreOrganizacion: nn(productor.nombreOrganizacion),
-          representante: nn(productor.representante),
-          rfc: nn(productor.rfc),
-          curp: nn(productor.curp),
-          genero: nn(productor.genero),
-          indigena: productor.indigena || 'NO',
-          etnia: nn(productor.etnia),
-          discapacidad: productor.discapacidad || 'NO',
-          tipoDiscapacidad: nn(productor.tipoDiscapacidad),
-          // Convertir a entero (los formularios HTML envían strings)
-          beneficiariosHombres: productor.beneficiariosHombres ? parseInt(productor.beneficiariosHombres) : undefined,
-          beneficiariosMujeres: productor.beneficiariosMujeres ? parseInt(productor.beneficiariosMujeres) : undefined,
-          tipoIdentificacion: nn(productor.tipoIdentificacion),
-          folioIdentificacion: nn(productor.folioIdentificacion),
-          domicilio: productor.domicilio,
-          telefono: nn(productor.telefono),
-          municipio: productor.municipio,
-          localidad: productor.localidad
-        }
-      });
+      const cleanCurp = productor.curp?.trim()?.toUpperCase();
+      const cleanRfc = productor.rfc?.trim()?.toUpperCase();
+
+      let existente = null;
+      if (cleanCurp) {
+        existente = await tx.productor.findFirst({ where: { curp: cleanCurp } });
+      }
+      if (!existente && cleanRfc) {
+        existente = await tx.productor.findFirst({ where: { rfc: cleanRfc } });
+      }
+
+      if (existente) {
+        // Reutilizar el perfil de ciudadano u organización existente
+        nuevoProductor = await tx.productor.update({
+          where: { id: existente.id },
+          data: {
+            domicilio: productor.domicilio || existente.domicilio,
+            telefono: nn(productor.telefono) || existente.telefono,
+            municipio: productor.municipio || existente.municipio,
+            localidad: productor.localidad || existente.localidad
+          }
+        });
+      } else {
+        // Registrar nuevo ciudadano u organización
+        nuevoProductor = await tx.productor.create({
+          data: {
+            tipoPersona: productor.tipoPersona,
+            nombre: nn(productor.nombre),
+            apellidoPaterno: nn(productor.apellidoPaterno),
+            apellidoMaterno: nn(productor.apellidoMaterno),
+            nombreOrganizacion: nn(productor.nombreOrganizacion),
+            representante: nn(productor.representante),
+            rfc: cleanRfc || nn(productor.rfc),
+            curp: cleanCurp || nn(productor.curp),
+            genero: nn(productor.genero),
+            indigena: productor.indigena || 'NO',
+            etnia: nn(productor.etnia),
+            discapacidad: productor.discapacidad || 'NO',
+            tipoDiscapacidad: nn(productor.tipoDiscapacidad),
+            beneficiariosHombres: productor.beneficiariosHombres ? parseInt(productor.beneficiariosHombres) : undefined,
+            beneficiariosMujeres: productor.beneficiariosMujeres ? parseInt(productor.beneficiariosMujeres) : undefined,
+            tipoIdentificacion: nn(productor.tipoIdentificacion),
+            folioIdentificacion: nn(productor.folioIdentificacion),
+            domicilio: productor.domicilio,
+            telefono: nn(productor.telefono),
+            municipio: productor.municipio,
+            localidad: productor.localidad
+          }
+        });
+      }
     }
 
     // ── Paso 2: Generar Folio ──────────────────────────────────────────────────
@@ -733,7 +757,40 @@ export async function getStatsDashboard() {
 export async function getProductoresList() {
   return prisma.productor.findMany({
     include: {
-      solicitud: {
+      solicitudes: {
+        select: {
+          id: true,
+          folio: true,
+          moduloTipo: true,
+          status: true,
+          fechaRegistro: true
+        },
+        orderBy: { fechaRegistro: 'desc' }
+      }
+    },
+    orderBy: { createdAt: 'desc' }
+  });
+}
+
+/**
+ * Busca si un productor (ciudadano u organización) ya existe en la base de datos por CURP o RFC.
+ *
+ * @param {string} queryStr - CURP o RFC a consultar
+ * @returns {Promise<Productor|null>} El productor encontrado o null
+ */
+export async function buscarProductorByCurpOrRfc(queryStr) {
+  if (!queryStr || queryStr.trim().length < 3) return null;
+  const q = queryStr.trim().toUpperCase();
+
+  return prisma.productor.findFirst({
+    where: {
+      OR: [
+        { curp: { equals: q, mode: 'insensitive' } },
+        { rfc: { equals: q, mode: 'insensitive' } }
+      ]
+    },
+    include: {
+      solicitudes: {
         select: {
           id: true,
           folio: true,
@@ -741,7 +798,6 @@ export async function getProductoresList() {
           status: true
         }
       }
-    },
-    orderBy: { createdAt: 'desc' }
+    }
   });
 }

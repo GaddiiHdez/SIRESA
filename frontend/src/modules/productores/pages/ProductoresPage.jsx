@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { apiGetProductores, apiGetSolicitud, apiActualizarEstatus, apiGetCatalogos, getCurrentUser } from '../../../shared/services/api';
-import { Users, Search, UserCheck, Building, MapPin, Phone, FileText, ChevronRight, X, Calendar, ClipboardCheck, Sparkles } from 'lucide-react';
+import { Users, Search, UserCheck, Building, MapPin, Phone, FileText, ChevronRight, X, Calendar, ClipboardCheck, Sparkles, Folder } from 'lucide-react';
 import ExpedienteDetalleModal from '../../solicitudes/components/ExpedienteDetalleModal';
 import { toast } from '../../../shared/utils/toast';
 import { formatModulo } from '../../../shared/utils/formatters';
@@ -119,10 +119,10 @@ export default function ProductoresPage() {
     // Filtro de búsqueda por texto (nombre, CURP, RFC)
     let matchesSearch = false;
     if (p.tipoPersona === 'FISICA') {
-      const fullName = `${p.nombre} ${p.apellidoPaterno} ${p.apellidoMaterno || ''}`.toLowerCase();
+      const fullName = `${p.nombre || ''} ${p.apellidoPaterno || ''} ${p.apellidoMaterno || ''}`.toLowerCase();
       matchesSearch = fullName.includes(searchLower) || (p.curp && p.curp.toLowerCase().includes(searchLower));
     } else {
-      const fullName = `${p.nombreOrganizacion} ${p.representante || ''}`.toLowerCase();
+      const fullName = `${p.nombreOrganizacion || ''} ${p.representante || ''}`.toLowerCase();
       matchesSearch = fullName.includes(searchLower) || (p.rfc && p.rfc.toLowerCase().includes(searchLower));
     }
 
@@ -136,6 +136,43 @@ export default function ProductoresPage() {
 
     return matchesSearch && matchesMunicipio && matchesTab;
   });
+
+  // Renderizar celda de expedientes para un productor
+  const renderExpedientesCelda = (prod) => {
+    const lista = prod.solicitudes || (prod.solicitud ? [prod.solicitud] : []);
+
+    if (lista.length === 0) {
+      return <span className="text-[10px] text-slate-400 font-bold italic">Sin solicitudes</span>;
+    }
+
+    if (lista.length === 1) {
+      const sol = lista[0];
+      return (
+        <button
+          onClick={() => handleOpenExpediente(sol.id)}
+          className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-50 hover:bg-nayarit-gold/10 border border-slate-200 hover:border-nayarit-gold/30 rounded-xl text-xs font-bold text-slate-700 transition-smooth cursor-pointer"
+        >
+          <FileText className="w-3.5 h-3.5 text-nayarit-gold" />
+          {sol.folio}
+          <span className="px-1.5 py-0.25 bg-white border border-slate-200 rounded text-[8px] font-extrabold text-slate-500 uppercase">
+            {sol.status}
+          </span>
+        </button>
+      );
+    }
+
+    // Si tiene múltiples expedientes
+    return (
+      <button
+        onClick={() => setSelectedProductor(prod)}
+        className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 rounded-xl text-xs font-extrabold transition-smooth cursor-pointer shadow-2xs"
+        title="Haga clic para ver todos sus expedientes"
+      >
+        <Folder className="w-3.5 h-3.5 text-nayarit-gold" />
+        <span>{lista.length} Expedientes</span>
+      </button>
+    );
+  };
 
   return (
     <div className="space-y-6 animate-fadeIn">
@@ -249,7 +286,7 @@ export default function ProductoresPage() {
                   <th className="py-4 px-6">Ubicación</th>
                   <th className="py-4 px-6">Contacto</th>
                   <th className="py-4 px-6">Demografía</th>
-                  <th className="py-4 px-6 text-center">Expediente</th>
+                  <th className="py-4 px-6 text-center">Expediente(s)</th>
                   <th className="py-4 px-6 text-center">Acciones</th>
                 </tr>
               </thead>
@@ -282,26 +319,13 @@ export default function ProductoresPage() {
                       </div>
                     </td>
                     <td className="py-4 px-6 text-center">
-                      {prod.solicitud ? (
-                        <button
-                          onClick={() => handleOpenExpediente(prod.solicitud.id)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-50 hover:bg-nayarit-gold/10 border border-slate-200 hover:border-nayarit-gold/30 rounded-xl text-xs font-bold text-slate-700 transition-smooth cursor-pointer"
-                        >
-                          <FileText className="w-3.5 h-3.5 text-nayarit-gold" />
-                          {prod.solicitud.folio}
-                          <span className="px-1.5 py-0.25 bg-white border border-slate-200 rounded text-[8px] font-extrabold text-slate-500 uppercase">
-                            {prod.solicitud.status}
-                          </span>
-                        </button>
-                      ) : (
-                        <span className="text-[10px] text-slate-400 font-bold italic">Sin solicitud</span>
-                      )}
+                      {renderExpedientesCelda(prod)}
                     </td>
                     <td className="py-4 px-6 text-center">
                       <button
                         onClick={() => setSelectedProductor(prod)}
                         className="p-2 bg-slate-100 hover:bg-nayarit-gold/20 hover:text-nayarit-gold text-slate-500 rounded-lg transition-smooth cursor-pointer"
-                        title="Ver ficha técnica"
+                        title="Ver perfil completo de expedientes"
                       >
                         <Users className="w-4 h-4" />
                       </button>
@@ -322,7 +346,7 @@ export default function ProductoresPage() {
                   <th className="py-4 px-6">RFC</th>
                   <th className="py-4 px-6">Ubicación</th>
                   <th className="py-4 px-6">Contacto</th>
-                  <th className="py-4 px-6 text-center">Expediente</th>
+                  <th className="py-4 px-6 text-center">Expediente(s)</th>
                   <th className="py-4 px-6 text-center">Acciones</th>
                 </tr>
               </thead>
@@ -349,26 +373,13 @@ export default function ProductoresPage() {
                       {prod.telefono || 'Sin teléfono'}
                     </td>
                     <td className="py-4 px-6 text-center">
-                      {prod.solicitud ? (
-                        <button
-                          onClick={() => handleOpenExpediente(prod.solicitud.id)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-50 hover:bg-nayarit-gold/10 border border-slate-200 hover:border-nayarit-gold/30 rounded-xl text-xs font-bold text-slate-700 transition-smooth cursor-pointer"
-                        >
-                          <FileText className="w-3.5 h-3.5 text-nayarit-gold" />
-                          {prod.solicitud.folio}
-                          <span className="px-1.5 py-0.25 bg-white border border-slate-200 rounded text-[8px] font-extrabold text-slate-500 uppercase">
-                            {prod.solicitud.status}
-                          </span>
-                        </button>
-                      ) : (
-                        <span className="text-[10px] text-slate-400 font-bold italic">Sin solicitud</span>
-                      )}
+                      {renderExpedientesCelda(prod)}
                     </td>
                     <td className="py-4 px-6 text-center">
                       <button
                         onClick={() => setSelectedProductor(prod)}
                         className="p-2 bg-slate-100 hover:bg-nayarit-gold/20 hover:text-nayarit-gold text-slate-500 rounded-lg transition-smooth cursor-pointer"
-                        title="Ver ficha técnica"
+                        title="Ver perfil completo de expedientes"
                       >
                         <Users className="w-4 h-4" />
                       </button>
@@ -381,7 +392,7 @@ export default function ProductoresPage() {
         )}
       </div>
 
-      {/* 4. MODAL DE FICHA DEL PRODUCTOR (DETALLE COMPLETO) */}
+      {/* 4. MODAL DE FICHA DEL PRODUCTOR (DETALLE COMPLETO E HISTORIAL DE SOLICITUDES) */}
       {selectedProductor && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 overflow-y-auto animate-fadeIn">
           <div className="bg-white rounded-3xl w-full max-w-2xl shadow-2xl relative border border-slate-200/80 overflow-hidden flex flex-col animate-scaleUp">
@@ -393,7 +404,7 @@ export default function ProductoresPage() {
                   <Sparkles className="w-5 h-5" />
                 </div>
                 <div>
-                  <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest block font-extrabold">Ficha Técnica</span>
+                  <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest block font-extrabold">Ficha Técnica Única</span>
                   <h3 className="text-sm font-bold text-slate-800 mt-0.5">Perfil de Beneficiario</h3>
                 </div>
               </div>
@@ -430,7 +441,7 @@ export default function ProductoresPage() {
 
               {/* Información Personal / Datos Generales */}
               <div className="space-y-3">
-                <h4 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block border-b border-slate-100 pb-1.5 font-extrabold">Datos Generales</h4>
+                <h4 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block border-b border-slate-100 pb-1.5">Datos Generales</h4>
                 <div className="grid grid-cols-2 gap-4 text-xs font-medium text-slate-700">
                   {selectedProductor.tipoPersona === 'FISICA' && (
                     <>
@@ -444,7 +455,7 @@ export default function ProductoresPage() {
                       </div>
                     </>
                   )}
-                  {selectedProductor.tipoPersona === 'MORAL' && (
+                  {selectedProductor.tipoPersona !== 'FISICA' && (
                     <>
                       <div>
                         <span className="text-[9px] text-slate-400 font-bold block">Representante Legal</span>
@@ -461,7 +472,7 @@ export default function ProductoresPage() {
                     <span className="mt-0.5 block">{selectedProductor.telefono || 'No registrado'}</span>
                   </div>
                   <div>
-                    <span className="text-[9px] text-slate-400 font-bold block">Fecha de Registro</span>
+                    <span className="text-[9px] text-slate-400 font-bold block">Fecha de Registro en Padrón</span>
                     <span className="mt-0.5 block">{new Date(selectedProductor.createdAt).toLocaleDateString('es-MX')}</span>
                   </div>
                 </div>
@@ -469,7 +480,7 @@ export default function ProductoresPage() {
 
               {/* Ubicación y Domicilio */}
               <div className="space-y-3">
-                <h4 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block border-b border-slate-100 pb-1.5 font-extrabold font-extrabold">Ubicación y Domicilio</h4>
+                <h4 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block border-b border-slate-100 pb-1.5">Ubicación y Domicilio</h4>
                 <div className="grid grid-cols-2 gap-4 text-xs font-medium text-slate-700">
                   <div>
                     <span className="text-[9px] text-slate-400 font-bold block">Municipio</span>
@@ -486,55 +497,62 @@ export default function ProductoresPage() {
                 </div>
               </div>
 
-              {/* Expedientes / Acciones */}
+              {/* Expedientes e Historial de Solicitudes */}
               <div className="space-y-3">
-                <h4 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block border-b border-slate-100 pb-1.5 font-extrabold">Expedientes en Trámite</h4>
+                <div className="flex justify-between items-center border-b border-slate-100 pb-1.5">
+                  <h4 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block">Expedientes e Historial de Solicitudes</h4>
+                  <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                    {(selectedProductor.solicitudes || (selectedProductor.solicitud ? [selectedProductor.solicitud] : [])).length} Expediente(s)
+                  </span>
+                </div>
                 
-                {selectedProductor.solicitud ? (
-                  <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 flex flex-col sm:flex-row justify-between gap-4 sm:items-center">
-                    <div className="min-w-0 flex items-start gap-3">
-                      <div className="p-2.5 rounded-xl bg-nayarit-gold/10 text-nayarit-gold mt-0.5">
-                        <FileText className="w-5 h-5" />
-                      </div>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-bold text-slate-800">{selectedProductor.solicitud.folio}</span>
-                          <span className="px-2 py-0.25 bg-slate-100 rounded text-[9px] font-bold text-slate-500">
-                            {selectedProductor.solicitud.status}
-                          </span>
+                {((selectedProductor.solicitudes || (selectedProductor.solicitud ? [selectedProductor.solicitud] : [])).length > 0) ? (
+                  <div className="space-y-2">
+                    {(selectedProductor.solicitudes || [selectedProductor.solicitud]).map(sol => (
+                      <div key={sol.id} className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 flex flex-col sm:flex-row justify-between gap-3 sm:items-center">
+                        <div className="min-w-0 flex items-start gap-3">
+                          <div className="p-2.5 rounded-xl bg-nayarit-gold/10 text-nayarit-gold mt-0.5">
+                            <FileText className="w-4 h-4" />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold text-slate-800">{sol.folio}</span>
+                              <span className="px-2 py-0.25 bg-white border border-slate-200 rounded text-[9px] font-bold text-slate-500 uppercase">
+                                {sol.status}
+                              </span>
+                            </div>
+                            <span className="text-[10px] text-slate-400 font-semibold block mt-0.5">
+                              Sector: {formatModulo(sol.moduloTipo)}
+                            </span>
+                          </div>
                         </div>
-                        <span className="text-[10px] text-slate-450 font-bold block mt-1">
-                          Sector: {formatModulo(selectedProductor.solicitud.moduloTipo)}
-                        </span>
-                      </div>
-                    </div>
 
-                    <button
-                      onClick={() => {
-                        setSelectedProductor(null);
-                        handleOpenExpediente(selectedProductor.solicitud.id);
-                      }}
-                      className="py-2 px-4 bg-nayarit-green hover:bg-nayarit-dark text-white rounded-xl text-xs font-bold transition-smooth flex items-center justify-center gap-1.5 shadow-sm cursor-pointer shrink-0"
-                    >
-                      Ver y Gestionar Expediente
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
+                        <button
+                          onClick={() => {
+                            setSelectedProductor(null);
+                            handleOpenExpediente(sol.id);
+                          }}
+                          className="py-1.5 px-3 bg-nayarit-green hover:bg-nayarit-dark text-white rounded-xl text-xs font-bold transition-smooth flex items-center justify-center gap-1 shadow-xs cursor-pointer shrink-0"
+                        >
+                          Ver Expediente
+                          <ChevronRight className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 ) : (
-                  <div className="bg-slate-50 rounded-2xl p-6 text-center text-xs text-slate-450 italic border border-dashed border-slate-200">
-                    Este productor no posee solicitudes registradas en este ciclo.
-                  </div>
+                  <p className="text-xs text-slate-400 italic">No hay expedientes vinculados a este productor.</p>
                 )}
               </div>
             </div>
 
-            {/* Footer Ficha */}
-            <div className="bg-slate-50 border-t border-slate-200 p-4 flex justify-end shrink-0">
+            {/* Pie Modal */}
+            <div className="bg-slate-50 border-t border-slate-200 px-6 py-4 flex justify-end shrink-0">
               <button
                 onClick={() => setSelectedProductor(null)}
-                className="px-4 py-2 border border-slate-200 text-slate-650 bg-white hover:bg-slate-55 rounded-xl text-xs font-bold transition-smooth cursor-pointer"
+                className="px-5 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold rounded-xl transition-smooth cursor-pointer"
               >
-                Cerrar Ficha
+                Cerrar Perfil
               </button>
             </div>
 
@@ -542,25 +560,20 @@ export default function ProductoresPage() {
         </div>
       )}
 
-      {/* 5. MODAL DETALLE DE EXPEDIENTE (COMPONENTE INTEGRADO) */}
+      {/* 5. MODAL DE DETALLE COMPLETO DE EXPEDIENTE */}
       {selectedSolicitud && (
         <ExpedienteDetalleModal
-          selectedSolicitud={selectedSolicitud}
-          setSelectedSolicitud={setSelectedSolicitud}
+          solicitud={selectedSolicitud}
+          loading={modalLoading}
+          onClose={() => setSelectedSolicitud(null)}
+          currentUser={currentUser}
           newEstatus={newEstatus}
           setNewEstatus={setNewEstatus}
           estatusComentario={estatusComentario}
           setEstatusComentario={setEstatusComentario}
           updateLoading={updateLoading}
-          handleUpdateEstatus={handleUpdateEstatus}
+          onUpdateEstatus={handleUpdateEstatus}
         />
-      )}
-
-      {/* Spinner de Carga de red */}
-      {modalLoading && (
-        <div className="fixed inset-0 bg-slate-900/20 backdrop-blur-xs z-[200] flex items-center justify-center">
-          <div className="w-10 h-10 border-4 border-nayarit-green border-t-transparent rounded-full animate-spin" />
-        </div>
       )}
 
     </div>

@@ -193,3 +193,23 @@ export async function obtenerProductores(req, res) {
     res.status(500).json({ error: 'Error al obtener el padrón de productores.' });
   }
 }
+
+/**
+ * GET /api/solicitudes/productores/buscar?q=...
+ *
+ * Consulta si un ciudadano u organización ya existe por CURP o RFC.
+ */
+export async function buscarProductor(req, res) {
+  try {
+    const { q } = req.query;
+    if (!q) {
+      res.status(400).json({ error: 'El parámetro q (CURP o RFC) es requerido.' });
+      return;
+    }
+    const productor = await service.buscarProductorByCurpOrRfc(q);
+    res.json({ existe: !!productor, productor });
+  } catch (error) {
+    console.error('Error al buscar productor por CURP/RFC:', error);
+    res.status(500).json({ error: 'Error al consultar unicidad de productor.' });
+  }
+}

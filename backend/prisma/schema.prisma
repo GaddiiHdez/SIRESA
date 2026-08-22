@@ -27,8 +27,8 @@ model Solicitud {
   status         String   @default("REGISTRADA") // REGISTRADA, EN REVISIÓN, DICTAMINADA, APROBADA, PAGADA, FINALIZADA
 
   // Relaciones principales
-  productorId    String?   @unique
-  productor      Productor? @relation(fields: [productorId], references: [id], onDelete: Cascade)
+  productorId    String?
+  productor      Productor? @relation(fields: [productorId], references: [id], onDelete: SetNull)
 
   apoyoControlId String?   @unique
   apoyoControl   ApoyoControl? @relation(fields: [apoyoControlId], references: [id], onDelete: Cascade)
@@ -63,7 +63,7 @@ model Solicitud {
 
 model Productor {
   id                    String   @id @default(uuid())
-  solicitud             Solicitud?
+  solicitudes           Solicitud[]
   
   nombre                String?
   apellidoPaterno       String?

@@ -458,3 +458,16 @@ export async function apiGetDirectorioGeo(filters = {}) {
   });
   return handleResponse(res, 'Error al obtener datos cartográficos del Geodirectorio.');
 }
+
+/**
+ * Consulta si un ciudadano u organización ya está registrado en el padrón por CURP o RFC.
+ * @param {string} queryStr - CURP o RFC
+ * @returns {Promise<{existe: boolean, productor: Object|null}>}
+ */
+export async function apiBuscarProductor(queryStr) {
+  if (!queryStr) return { existe: false, productor: null };
+  const res = await fetch(`${API_URL}/solicitudes/productores/buscar?q=${encodeURIComponent(queryStr)}`, {
+    headers: getAuthHeaders()
+  });
+  return handleResponse(res, 'Error al verificar la CURP / RFC del productor.');
+}

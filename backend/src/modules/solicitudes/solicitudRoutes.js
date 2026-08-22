@@ -21,7 +21,8 @@ import {
   actualizarEstatus,
   actualizarDocumentos,
   obtenerStats,
-  obtenerProductores
+  obtenerProductores,
+  buscarProductor
 } from './solicitudController.js';
 import { authMiddleware } from '../../shared/middleware/auth.js';
 import { validate, validateParams, validateQuery } from '../../shared/middleware/validate.js';
@@ -86,6 +87,13 @@ router.get('/productores',
   authMiddleware,
   requireRole('SUPERADMIN', 'ADMINISTRADOR', 'FUNCIONARIO', 'ANALISTA'),
   obtenerProductores
+);
+
+// Consulta de unicidad por CURP o RFC (todos los roles)
+router.get('/productores/buscar',
+  authMiddleware,
+  requireRole('SUPERADMIN', 'ADMINISTRADOR', 'FUNCIONARIO', 'ANALISTA'),
+  buscarProductor
 );
 
 // Detalle de un expediente por ID (todos los roles)
