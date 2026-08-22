@@ -37,9 +37,6 @@ export default function DashboardPage() {
   // Pestaña activa en la Bandeja de Tareas ('PENDIENTES', 'APROBADAS', 'TODAS')
   const [activeTab, setActiveTab] = useState('PENDIENTES');
 
-  // Buscador rápido omnibox en el hero
-  const [quickSearch, setQuickSearch] = useState('');
-
   // Modal de Detalle de Expediente In-Place
   const [selectedSolicitud, setSelectedSolicitud] = useState(null);
   const [modalLoading, setModalLoading] = useState(false);
@@ -153,23 +150,12 @@ export default function DashboardPage() {
     return solicitudes.filter(s => s.status === 'DICTAMINADA' || s.status === 'APROBADA' || s.status === 'PAGADA' || s.status === 'FINALIZADA');
   }, [solicitudes]);
 
-  // Lista filtrada según pestaña y buscador rápido
+  // Lista filtrada según pestaña
   const filteredList = useMemo(() => {
-    let list = solicitudes;
-    if (activeTab === 'PENDIENTES') list = pendientes;
-    if (activeTab === 'APROBADAS') list = aprobadas;
-
-    if (!quickSearch.trim()) return list;
-
-    const q = quickSearch.toLowerCase().trim();
-    return list.filter(s => {
-      const folioMatch = s.folio?.toLowerCase().includes(q);
-      const prodMatch = (s.productor?.nombreCompleto || `${s.productor?.nombre || ''} ${s.productor?.apellidoPaterno || ''}`)?.toLowerCase().includes(q);
-      const curpMatch = s.productor?.curp?.toLowerCase().includes(q);
-      const munMatch = s.productor?.municipio?.toLowerCase().includes(q);
-      return folioMatch || prodMatch || curpMatch || munMatch;
-    });
-  }, [solicitudes, pendientes, aprobadas, activeTab, quickSearch]);
+    if (activeTab === 'PENDIENTES') return pendientes;
+    if (activeTab === 'APROBADAS') return aprobadas;
+    return solicitudes;
+  }, [solicitudes, pendientes, aprobadas, activeTab]);
 
   const getStatusBadge = (status) => {
     switch (status) {
@@ -221,41 +207,18 @@ export default function DashboardPage() {
             </p>
           </div>
 
-          {/* Acciones Rápidas: Botón Nueva Solicitud + Buscador de Expedientes */}
-          <div className="w-full lg:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            
-            {/* Botón de Acceso Rápido: Nueva Solicitud */}
-            {currentUser?.role !== 'ANALISTA' && (
+          {/* Acceso Rápido: Botón Nueva Solicitud */}
+          {currentUser?.role !== 'ANALISTA' && (
+            <div className="w-full sm:w-auto shrink-0">
               <button
                 onClick={() => navigate('/registrar')}
-                className="py-3 px-5 bg-[#C29A52] hover:bg-[#b08b47] text-slate-950 rounded-2xl font-black text-xs flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-xl hover:scale-[1.02] cursor-pointer shrink-0"
+                className="w-full sm:w-auto py-3.5 px-6 bg-[#C29A52] hover:bg-[#b08b47] text-slate-950 rounded-2xl font-black text-xs flex items-center justify-center gap-2.5 transition-all shadow-xl hover:shadow-2xl hover:scale-[1.03] cursor-pointer"
               >
-                <PlusCircle size={16} className="text-slate-950 stroke-[2.5]" />
-                <span>Nueva Solicitud</span>
+                <PlusCircle size={18} className="text-slate-950 stroke-[2.5]" />
+                <span className="text-xs uppercase tracking-wider font-extrabold">Nueva Solicitud</span>
               </button>
-            )}
-
-            {/* Buscador Rápido de Expediente */}
-            <div className="relative w-full sm:w-72 md:w-80">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-              <input
-                type="text"
-                value={quickSearch}
-                onChange={(e) => setQuickSearch(e.target.value)}
-                placeholder="Buscar folio, CURP o productor..."
-                className="w-full pl-10 pr-4 py-3 bg-white/10 hover:bg-white/15 focus:bg-white focus:text-slate-900 focus:placeholder-slate-500 border border-white/20 rounded-2xl text-xs font-semibold text-white placeholder-slate-300 outline-none focus:border-white transition-all shadow-sm"
-              />
-              {quickSearch && (
-                <button
-                  onClick={() => setQuickSearch('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-[10px] font-bold bg-white/10 px-2 py-0.5 rounded-lg"
-                >
-                  Limpiar
-                </button>
-              )}
             </div>
-
-          </div>
+          )}
 
         </div>
       </div>
