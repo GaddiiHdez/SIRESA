@@ -68,11 +68,10 @@ export default function DashboardPage() {
     window.dispatchEvent(new CustomEvent('sdr-navbar-update', {
       detail: {
         label: "CENTRO DE OPERACIONES",
-        title: "MESA DE CONTROL Y BANDEJA DE TRABAJO",
+        title: "MESA DE CONTROL",
         iconKey: "SOLICITUDES",
         actions: [
-          { id: "actualizar", text: "Actualizar" },
-          ...(currentUser?.role !== 'ANALISTA' ? [{ id: "navigate-registrar", text: "Nueva Solicitud" }] : [])
+          { id: "actualizar", text: "Actualizar" }
         ]
       }
     }));

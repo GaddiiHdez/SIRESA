@@ -434,29 +434,29 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
         </header>
 
         {/* NAV BAR SUPERIOR (DESKTOP) */}
-        <header className="hidden md:flex items-center justify-between px-8 py-2.5 bg-white/90 backdrop-blur-md border-b border-slate-200/80 shrink-0 shadow-sm text-slate-800 transition-all duration-300 relative z-30">
-          <div className="flex items-center gap-4">
+        <header className="hidden md:flex items-center justify-between px-4 lg:px-6 xl:px-8 py-2.5 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shrink-0 shadow-sm text-slate-800 transition-all duration-300 relative z-30 min-w-0">
+          <div className="flex items-center gap-2.5 lg:gap-3.5 min-w-0 mr-2 shrink">
             <img 
               src="/logo-sdr.png" 
               alt="Secretaría de Desarrollo Rural Nayarit" 
-              className="h-10 w-auto object-contain shrink-0" 
+              className="h-8 lg:h-9 w-auto object-contain shrink-0" 
             />
-            <div className="h-7 w-[1px] bg-slate-200 shrink-0" />
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-nayarit-gold/10 rounded-xl text-nayarit-gold border border-nayarit-gold/25 flex items-center justify-center shrink-0 shadow-2xs">
-                {IconComponent && <IconComponent className="w-5 h-5" />}
+            <div className="h-6 w-[1px] bg-slate-200 shrink-0 hidden sm:block" />
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="p-1.5 lg:p-2 bg-nayarit-gold/10 rounded-xl text-nayarit-gold border border-nayarit-gold/25 flex items-center justify-center shrink-0 shadow-2xs">
+                {IconComponent && <IconComponent className="w-4 h-4 lg:w-5 lg:h-5" />}
               </div>
-              <div>
-                <span className="text-[10px] font-extrabold text-nayarit-gold uppercase tracking-widest leading-none block">
+              <div className="min-w-0">
+                <span className="text-[9px] lg:text-[10px] font-extrabold text-nayarit-gold uppercase tracking-widest leading-none truncate block">
                   {captureState.label}
                 </span>
-                <h2 className="text-[15px] font-black text-nayarit-dark uppercase tracking-wide mt-0.5">
+                <h2 className="text-xs lg:text-[14px] font-black text-slate-800 uppercase tracking-wide truncate mt-0.5 whitespace-nowrap block">
                   {captureState.title}
                 </h2>
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 lg:gap-3 shrink-0">
             {/* BUSCADOR INTERACTIVO EN NAVBAR */}
             <BuscadorNavbar onSelectExpediente={handleOpenDetail} />
 

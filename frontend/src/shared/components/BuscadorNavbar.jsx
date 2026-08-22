@@ -81,7 +81,7 @@ export default function BuscadorNavbar({ onSelectExpediente }) {
   };
 
   return (
-    <div className="relative w-64 lg:w-80" ref={containerRef}>
+    <div className="relative w-36 sm:w-44 md:w-48 lg:w-64 xl:w-80 shrink-0" ref={containerRef}>
       {/* CAMPO DE ENTRADA REAL EN EL NAVBAR */}
       <div className="relative flex items-center">
         <Search className="w-4 h-4 text-slate-400 absolute left-3.5 pointer-events-none" />
