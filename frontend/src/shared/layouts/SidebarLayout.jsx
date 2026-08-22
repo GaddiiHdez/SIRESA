@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BarChart3, FileSpreadsheet, PlusCircle, LogOut, ShieldCheck, User, Menu, ChevronLeft, Sparkles, X, Users, PieChart, Search, Compass } from 'lucide-react';
+import { LayoutDashboard, BarChart3, FileSpreadsheet, PlusCircle, LogOut, ShieldCheck, User, Menu, ChevronLeft, Sparkles, X, Users, PieChart, Search, Compass } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { formatModulo } from '../utils/formatters';
 import { getSectorIcon } from '../config/sectoresMetadata';
@@ -181,8 +181,8 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
                       : 'hover:bg-white/5 text-slate-300 hover:text-white border-l-transparent'
                   }`}
                 >
-                  <BarChart3 className={`w-4.5 h-4.5 shrink-0 ${currentPath === '/' ? 'text-nayarit-gold' : 'text-slate-300'}`} />
-                  Panel Estratégico
+                  <LayoutDashboard className={`w-4.5 h-4.5 shrink-0 ${currentPath === '/' ? 'text-nayarit-gold' : 'text-slate-300'}`} />
+                  Mesa de Control
                 </button>
                 <button
                   onClick={() => navigate('/estadisticas')}
@@ -260,14 +260,14 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
               <div className="flex flex-col items-center gap-2 animate-fadeIn">
                 <button
                   onClick={() => navigate('/')}
-                  title="Panel Estratégico"
+                  title="Mesa de Control"
                   className={`w-12 h-12 flex items-center justify-center rounded-xl transition-smooth border-l-4 ${
                     currentPath === '/'
                       ? 'bg-gradient-to-r from-[#C29A52]/35 to-transparent text-white border-l-nayarit-gold shadow-sm'
                       : 'hover:bg-white/5 text-slate-300 hover:text-white border-l-transparent'
                   }`}
                 >
-                  <BarChart3 className={`w-5 h-5 ${currentPath === '/' ? 'text-nayarit-gold' : 'text-slate-300'}`} />
+                  <LayoutDashboard className={`w-5 h-5 ${currentPath === '/' ? 'text-nayarit-gold' : 'text-slate-300'}`} />
                 </button>
                 <button
                   onClick={() => navigate('/estadisticas')}
