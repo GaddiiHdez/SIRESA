@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { apiLogin } from '../../../shared/services/api';
 import { Lock, User, AlertCircle, Eye, EyeOff, ShieldCheck, ArrowRight } from 'lucide-react';
+import pkg from '../../../../package.json';
 
 export default function LoginPage({ onLoginSuccess }) {
   const [username, setUsername] = useState('');
@@ -54,9 +55,14 @@ export default function LoginPage({ onLoginSuccess }) {
               />
             </div>
             <div>
-              <span className="text-[10px] bg-nayarit-gold/25 text-nayarit-lightGold px-2.5 py-1 rounded-full font-bold uppercase tracking-widest border border-nayarit-gold/30 inline-block">
-                Portal Institucional
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] bg-nayarit-gold/25 text-nayarit-lightGold px-2.5 py-1 rounded-full font-bold uppercase tracking-widest border border-nayarit-gold/30 inline-block">
+                  Portal Institucional
+                </span>
+                <span className="text-[10px] bg-white/10 text-white px-2 py-0.5 rounded-full font-extrabold border border-white/20 tracking-wider">
+                  v{pkg.version}
+                </span>
+              </div>
               <h2 className="text-2xl font-black tracking-wider mt-3 text-white">
                 SIRESA
               </h2>
@@ -166,6 +172,16 @@ export default function LoginPage({ onLoginSuccess }) {
                 )}
               </button>
             </form>
+
+            {/* Pie Informativo Institucional y Versión Actual */}
+            <div className="mt-8 pt-4 border-t border-slate-100 flex flex-col items-center gap-1.5 text-center">
+              <span className="text-[10px] font-extrabold text-[#5E1232] bg-nayarit-gold/15 px-2.5 py-0.5 rounded-full border border-nayarit-gold/30 tracking-wider">
+                SIRESA v{pkg.version}
+              </span>
+              <span className="text-[11px] text-slate-500 font-medium leading-tight">
+                Secretaría de Desarrollo Rural<br />Gobierno del Estado de Nayarit
+              </span>
+            </div>
           </div>
 
 
