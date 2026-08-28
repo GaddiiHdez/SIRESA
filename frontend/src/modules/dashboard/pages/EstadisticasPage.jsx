@@ -172,6 +172,7 @@ export default function EstadisticasPage() {
       {/* Drawer de Inspección Detallada por Sector */}
       {selectedSector && (
         <DrawerLateralSector
+          sector={selectedSector}
           sectorKey={selectedSector}
           modulos={modulos}
           onClose={() => setSelectedSector(null)}
@@ -184,6 +185,7 @@ export default function EstadisticasPage() {
         <DrawerLateralProductores
           beneficiarios={resumen.beneficiarios}
           onClose={() => setShowProductoresDrawer(false)}
+          onOpenDetail={handleOpenDetail}
         />
       )}
 
