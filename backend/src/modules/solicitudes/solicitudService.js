@@ -674,18 +674,33 @@ export async function getStatsDashboard() {
   // Obtener los presupuestos sectoriales asignados desde la tabla PresupuestoSector
   const presupuestosBd = await prisma.presupuestoSector.findMany();
 
-  // Combinar datos de inversión real con presupuesto asignado por sector
-  const modulosConPresupuesto = presupuestosBd.map(p => {
-    const dbModulo = modulosGroup.find(m => m.modulo === p.sector);
+  // Lista canónica de los 5 sectores productivos oficiales
+  const SECTORES_OFICIALES = [
+    'AGRICULTURA_FRIJOL',
+    'GANADERIA',
+    'PESCA_ACUACULTURA',
+    'INFRAESTRUCTURA',
+    'MAQUINARIA'
+  ];
+
+  // Mapa con los presupuestos configurados en BD
+  const mapaPresupuestosBd = {};
+  presupuestosBd.forEach(p => {
+    mapaPresupuestosBd[p.sector] = Number(p.montoAsignado || 0);
+  });
+
+  // Asegurar que los 5 sectores oficiales SIEMPRE existan en la respuesta
+  const modulosConPresupuesto = SECTORES_OFICIALES.map(sectorKey => {
+    const dbModulo = modulosGroup.find(m => m.modulo === sectorKey);
     return {
-      modulo: p.sector,
+      modulo: sectorKey,
       count: dbModulo ? dbModulo.count : 0,
       inversion: dbModulo ? dbModulo.inversion : 0,
-      presupuestoAsignado: Number(p.montoAsignado)
+      presupuestoAsignado: mapaPresupuestosBd[sectorKey] !== undefined ? mapaPresupuestosBd[sectorKey] : 0
     };
   });
 
-  // Agregar módulos que tienen expedientes pero no tienen presupuesto asignado (ej: MEDIOS)
+  // Agregar módulos adicionales que no estén en la lista oficial pero tengan expedientes (ej: MEDIOS, TEMAS_IMPORTANTES)
   modulosGroup.forEach(m => {
     const existe = modulosConPresupuesto.some(p => p.modulo === m.modulo);
     if (!existe) {
@@ -693,10 +708,14 @@ export async function getStatsDashboard() {
         modulo: m.modulo,
         count: m.count,
         inversion: m.inversion,
-        presupuestoAsignado: 0
+        presupuestoAsignado: mapaPresupuestosBd[m.modulo] || 0
       });
     }
   });
+
+  // Calcular el total de presupuesto asignado sumando los sectores oficiales
+  const presupuestoTotalAsignado = modulosConPresupuesto.reduce((acc, curr) => acc + (curr.presupuestoAsignado || 0), 0);
+  const presupuestoConfigurado = presupuestoTotalAsignado > 0;
 
   // Top municipios por inversión total
   const municipioInversiones = await prisma.$queryRaw`
@@ -730,6 +749,8 @@ export async function getStatsDashboard() {
       totalSolicitudes,
       inversionTotal: sumas._sum.montoTotal || 0,
       inversionAprobada: sumasAprobadas._sum.montoTotal || 0,
+      presupuestoTotalAsignado,
+      presupuestoConfigurado,
       beneficiarios: {
         hombres: beneficiariosHombres,
         mujeres: beneficiariosMujeres,

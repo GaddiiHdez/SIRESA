@@ -370,22 +370,34 @@ export async function apiGetProductores() {
 // ─── Presupuestos ──────────────────────────────────────────────────────────────
 
 /**
- * Actualiza los presupuestos sectoriales.
- * @param {Array} presupuestos - Array de { sector, montoAsignado }
+ * Actualiza los presupuestos sectoriales (individual o en lote).
+ * @param {string|Array|Object} sectorOrList - Nombre del sector, lista de presupuestos o mapa clave-valor
+ * @param {number} [monto] - Monto asignado (si se pasa sector individual)
  * @returns {Promise<Object>} Resultado de la actualización
  */
-export async function apiActualizarPresupuestos(presupuestos) {
+export async function apiActualizarPresupuesto(sectorOrList, monto) {
+  let bodyPayload;
+  if (typeof sectorOrList === 'string') {
+    bodyPayload = { sector: sectorOrList, montoAsignado: monto };
+  } else if (Array.isArray(sectorOrList)) {
+    bodyPayload = { presupuestos: sectorOrList };
+  } else if (typeof sectorOrList === 'object' && sectorOrList !== null) {
+    bodyPayload = { presupuestos: sectorOrList };
+  } else {
+    bodyPayload = {};
+  }
+
   const res = await fetch(`${API_URL}/presupuestos`, {
     method: 'PUT',
     headers: getAuthHeaders(),
-    body: JSON.stringify({ presupuestos })
+    body: JSON.stringify(bodyPayload)
   });
   return handleResponse(res, 'Error al actualizar presupuestos sectoriales.');
 }
 
-/** Alias para compatibilidad con código existente */
-export async function apiActualizarPresupuesto(presupuestos) {
-  return apiActualizarPresupuestos(presupuestos);
+/** Alias para compatibilidad */
+export async function apiActualizarPresupuestos(presupuestos) {
+  return apiActualizarPresupuesto(presupuestos);
 }
 
 // ─── Gestión de Usuarios ───────────────────────────────────────────────────────

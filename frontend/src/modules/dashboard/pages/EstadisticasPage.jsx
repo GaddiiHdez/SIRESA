@@ -44,6 +44,8 @@ export default function EstadisticasPage() {
   useEffect(() => {
     fetchStats();
 
+    const canEdit = currentUser?.role === 'SUPERADMIN' || currentUser?.role === 'ADMINISTRADOR';
+
     // Notificar al navbar superior
     window.dispatchEvent(new CustomEvent('sdr-navbar-update', {
       detail: {
@@ -51,6 +53,7 @@ export default function EstadisticasPage() {
         title: "ESTADÍSTICAS Y ANÁLISIS FINANCIERO",
         iconKey: "ESTADISTICAS",
         actions: [
+          ...(canEdit ? [{ id: "ajustar-presupuesto", text: "Ajustar Presupuestos" }] : []),
           { id: "actualizar", text: "Actualizar" },
           ...(currentUser?.role !== 'ANALISTA' ? [{ id: "navigate-registrar", text: "Nueva Solicitud" }] : [])
         ]
@@ -62,9 +65,16 @@ export default function EstadisticasPage() {
       fetchStats();
     };
 
+    const handleAjustarPresupuestoNavbar = () => {
+      setShowBudgetModal(true);
+    };
+
     window.addEventListener('sdr-navbar-action-actualizar', handleActualizar);
+    window.addEventListener('sdr-navbar-action-ajustar-presupuesto', handleAjustarPresupuestoNavbar);
+
     return () => {
       window.removeEventListener('sdr-navbar-action-actualizar', handleActualizar);
+      window.removeEventListener('sdr-navbar-action-ajustar-presupuesto', handleAjustarPresupuestoNavbar);
     };
   }, []);
 

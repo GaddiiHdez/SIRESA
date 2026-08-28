@@ -31,6 +31,12 @@ Todas las modificaciones, actualizaciones, correcciones y nuevas funcionalidades
 - **Deduplicación Paginada por Lotes:** `autoDeduplicateProductores()` refactorizado para procesar en lotes de 500 registros (`take/skip`), eliminando picos de consumo de RAM al arranque del servidor.
 - **Buscador Navbar Lazy con Debounce:** `BuscadorNavbar.jsx` optimizado para consultar al backend tras un debounce de 300ms solo al escribir $\ge 3$ caracteres, eliminando la carga masiva en `focus`.
 
+### Gestión Presupuestal & Analítica Financiera
+- **Panel de Configuración de Presupuestos:** Modal interactiva `AjustarPresupuestoModal.jsx` con cálculo de suma estatal en tiempo real, carga de montos sugeridos y guardado atómico en lote.
+- **Estado 'Sin Configurar' y Banner Guía:** Banner informativo en `SectoresPresupuesto.jsx` que alerta y orienta a los administradores cuando los 5 sectores no cuentan con techos asignados.
+- **Habilitación de Permisos RBAC:** Corrección del control de permisos para permitir a `SUPERADMIN` y `ADMINISTRADOR` configurar presupuestos desde el header, tarjetas individuales y navbar.
+- **Controlador Robusto con Upsert y Limpieza de Caché:** `presupuestoController.js` mejorado con `prisma.presupuestoSector.upsert` e invalidación inmediata de caché de estadísticas.
+
 ### Calidad de Código & Trazabilidad
 - **Logging Estructurado con Winston:** Migradas todas las llamadas directas de `console.error` y `console.log` a `logger.error` / `logger.info` con metadatos JSON estructurados en `authController.js`, `userController.js` y `solicitudService.js`.
 - **Insignia de Versión en Login:** Visualización dinámica de la versión actual del sistema en la pantalla de inicio de sesión (`LoginPage.jsx`).
