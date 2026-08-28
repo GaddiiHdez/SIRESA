@@ -91,6 +91,7 @@ model Productor {
   updatedAt             DateTime @updatedAt
 
   @@index([curp])
+  @@index([rfc])
   @@index([municipio])
 }
 

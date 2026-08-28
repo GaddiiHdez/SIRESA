@@ -14,12 +14,13 @@
 import prisma from '../../shared/config/db.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import logger from '../../shared/utils/logger.js';
 
 // Clave secreta para firmar los tokens JWT.
 // DEBE coincidir con la usada en el middleware de autenticación.
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
-  console.error('CRITICAL: JWT_SECRET no está configurado en las variables de entorno.');
+  logger.error('CRITICAL: JWT_SECRET no está configurado en las variables de entorno. El servidor operará en modo inseguro.');
 }
 
 /**
@@ -73,7 +74,7 @@ export async function login(req, res) {
       await prisma.user.update({
         where: { id: user.id },
         data: { role: 'SUPERADMIN' }
-      }).catch(err => console.error('Error al actualizar rol de admin:', err));
+      }).catch(err => logger.warn('Error al actualizar rol efectivo de admin:', { error: err.message }));
     }
 
     // Generar el token JWT firmado con la clave secreta.
@@ -100,7 +101,7 @@ export async function login(req, res) {
       },
     });
   } catch (error) {
-    console.error('Error en login:', error);
+    logger.error('Error en login:', { error: error.message });
     res.status(500).json({ error: 'Error interno del servidor.' });
   }
 }

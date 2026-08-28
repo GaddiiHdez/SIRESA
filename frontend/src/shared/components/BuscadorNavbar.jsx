@@ -34,34 +34,31 @@ export default function BuscadorNavbar({ onSelectExpediente }) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const handleFocus = async () => {
-    setIsOpen(true);
-    if (solicitudes.length === 0) {
+  // Búsqueda lazy con debounce: solo hace fetch al escribir ≥ 3 caracteres
+  useEffect(() => {
+    if (query.trim().length < 3) {
+      setSolicitudes([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
       setLoading(true);
       try {
-        const data = await apiGetSolicitudes({ limit: 50 });
-        setSolicitudes(Array.isArray(data) ? data : []);
+        const data = await apiGetSolicitudes({ limit: 15, folio: query });
+        setSolicitudes(Array.isArray(data?.solicitudes) ? data.solicitudes : []);
       } catch (err) {
-        console.error("Error al cargar solicitudes para buscador:", err);
+        console.error('Error al cargar solicitudes para buscador:', err);
       } finally {
         setLoading(false);
       }
-    }
-  };
+    }, 300); // debounce 300ms
+    return () => clearTimeout(timer);
+  }, [query]);
 
-  const results = useMemo(() => {
-    if (!query.trim()) return solicitudes.slice(0, 5);
-    const q = query.toLowerCase();
-    return solicitudes.filter(sol => {
-      const folioMatch = sol.folio?.toLowerCase().includes(q);
-      const curpMatch = sol.productor?.curp?.toLowerCase().includes(q);
-      const rfcMatch = sol.productor?.rfc?.toLowerCase().includes(q);
-      const nombreMatch = sol.productor?.nombreCompleto?.toLowerCase().includes(q) || sol.productor?.razonSocial?.toLowerCase().includes(q);
-      const muniMatch = sol.productor?.municipio?.toLowerCase().includes(q);
-      const sectorMatch = sol.moduloTipo?.toLowerCase().includes(q);
-      return folioMatch || curpMatch || rfcMatch || nombreMatch || muniMatch || sectorMatch;
-    }).slice(0, 8);
-  }, [query, solicitudes]);
+  // Al hacer foco solo se abre el dropdown, sin petición al backend
+  const handleFocus = () => setIsOpen(true);
+
+  // Los resultados ya vienen filtrados del backend; solo se muestran los primeros 8
+  const results = useMemo(() => solicitudes.slice(0, 8), [solicitudes]);
 
   const handleKeyDown = (e) => {
     if (e.key === 'Escape') {

@@ -17,6 +17,7 @@
  */
 
 import prisma from '../../shared/config/db.js';
+import logger from '../../shared/utils/logger.js';
 
 /**
  * Convierte valores vacíos, null o undefined en `undefined`.
@@ -166,7 +167,6 @@ export async function createSolicitud(data, user) {
           superficie: apoyoControl.superficie ? parseFloat(apoyoControl.superficie) : undefined,
           tenenciaTierra: nn(apoyoControl.tenenciaTierra),
           conceptoApoyo: apoyoControl.conceptoApoyo,
-          indigo: apoyoControl.indigo ? String(apoyoControl.indigo) : undefined,
           unidadMedida: apoyoControl.unidadMedida,
           // Convertir a float (los formularios envían strings)
           cantidad: parseFloat(apoyoControl.cantidad || '0'),
@@ -805,25 +805,44 @@ export async function buscarProductorByCurpOrRfc(queryStr) {
 /**
  * Tarea automática ejecutada al arrancar el servidor para consolidar y fusionar
  * cualquier registro de productor duplicado existente en la base de datos (PostgreSQL).
+ *
+ * Procesa en lotes de 500 para evitar picos de memoria con padrones grandes.
  */
 export async function autoDeduplicateProductores() {
   try {
-    const todos = await prisma.productor.findMany({
-      include: { solicitudes: true },
-      orderBy: { createdAt: 'desc' }
-    });
-
+    const PAGE_SIZE = 500;
+    let skip = 0;
+    let batch;
     const grupos = {};
-    todos.forEach(p => {
-      const key = (p.curp?.trim() || p.rfc?.trim())?.toUpperCase();
-      if (key && key.length >= 10) {
-        if (!grupos[key]) grupos[key] = [];
-        grupos[key].push(p);
-      }
-    });
+
+    // Cargar todos los productores en lotes para evitar pico de RAM
+    do {
+      batch = await prisma.productor.findMany({
+        select: {
+          id: true,
+          curp: true,
+          rfc: true,
+          createdAt: true,
+          solicitudes: { select: { id: true } }
+        },
+        orderBy: { createdAt: 'desc' },
+        take: PAGE_SIZE,
+        skip
+      });
+
+      batch.forEach(p => {
+        const key = (p.curp?.trim() || p.rfc?.trim())?.toUpperCase();
+        if (key && key.length >= 10) {
+          if (!grupos[key]) grupos[key] = [];
+          grupos[key].push(p);
+        }
+      });
+
+      skip += PAGE_SIZE;
+    } while (batch.length === PAGE_SIZE);
 
     let mergedCount = 0;
-    for (const [key, lista] of Object.entries(grupos)) {
+    for (const [, lista] of Object.entries(grupos)) {
       if (lista.length > 1) {
         const principal = lista[0];
         const duplicados = lista.slice(1);
@@ -840,9 +859,9 @@ export async function autoDeduplicateProductores() {
     }
 
     if (mergedCount > 0) {
-      console.log(`[AUTO-DEDUPLICATION] ✅ Se consolidaron ${mergedCount} registros duplicados en la base de datos.`);
+      logger.info(`[AUTO-DEDUPLICATION] Se consolidaron ${mergedCount} registros duplicados en la base de datos.`);
     }
   } catch (err) {
-    console.error('[AUTO-DEDUPLICATION] Error al ejecutar desduplicación automática:', err);
+    logger.error('[AUTO-DEDUPLICATION] Error al ejecutar desduplicación automática:', { error: err.message });
   }
 }

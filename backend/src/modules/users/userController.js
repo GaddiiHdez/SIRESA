@@ -21,6 +21,7 @@
 
 import prisma from '../../shared/config/db.js';
 import bcrypt from 'bcrypt';
+import logger from '../../shared/utils/logger.js';
 
 /**
  * GET /api/users/
@@ -44,7 +45,7 @@ export async function getUsers(req, res) {
     });
     res.json(users);
   } catch (error) {
-    console.error('Error al obtener usuarios:', error);
+    logger.error('Error al obtener usuarios', { error: error.message });
     res.status(500).json({ error: 'Error interno del servidor al consultar usuarios.' });
   }
 }
@@ -104,7 +105,7 @@ export async function createUser(req, res) {
 
     res.status(201).json(newUser);
   } catch (error) {
-    console.error('Error al crear usuario:', error);
+    logger.error('Error al crear usuario', { error: error.message });
     res.status(500).json({ error: 'Error interno del servidor al crear usuario.' });
   }
 }
@@ -193,7 +194,7 @@ export async function updateUser(req, res) {
 
     res.json(updatedUser);
   } catch (error) {
-    console.error('Error al actualizar usuario:', error);
+    logger.error('Error al actualizar usuario', { error: error.message });
     res.status(500).json({ error: 'Error interno al actualizar usuario.' });
   }
 }
@@ -245,7 +246,7 @@ export async function deleteUser(req, res) {
 
     res.json({ message: `Usuario '${targetUser.username}' eliminado correctamente.` });
   } catch (error) {
-    console.error('Error al eliminar usuario:', error);
+    logger.error('Error al eliminar usuario', { error: error.message });
     res.status(500).json({ error: 'Error interno al eliminar usuario.' });
   }
 }

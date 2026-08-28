@@ -81,8 +81,8 @@ app.use(cors({
     // Si CORS_ORIGINS incluye '*', permitir cualquier origen
     if (allowedOrigins.includes('*')) return callback(null, true);
 
-    // Si el origen coincide con la lista configurada o es un subdominio de vercel.app
-    if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+    // Solo permitir orígenes explícitamente declarados en CORS_ORIGINS
+    if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
 
