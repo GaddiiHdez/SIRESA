@@ -21,7 +21,23 @@ Todas las modificaciones, actualizaciones, correcciones y nuevas funcionalidades
 
 ---
 
-## [1.2.0] — 2026-08-25 (Versión Actual en Producción)
+## [1.2.1] — 2026-08-28 (Versión Actual en Producción)
+### Seguridad & Hardening
+- **CORS Estricto:** Eliminada la excepción wildcard de `*.vercel.app` en `server.js`. Las peticiones ahora se restringen estrictamente a los orígenes declarados en `CORS_ORIGINS`.
+- **Inspección de Esquema y Sanitización:** Eliminado campo no declarado `indigo` en `solicitudService.js`.
+
+### Rendimiento & Base de Datos
+- **Índice en RFC:** Añadido `@@index([rfc])` en el modelo `Productor` (`schema.prisma`) para agilizar consultas cruzadas y validaciones de duplicidad.
+- **Deduplicación Paginada por Lotes:** `autoDeduplicateProductores()` refactorizado para procesar en lotes de 500 registros (`take/skip`), eliminando picos de consumo de RAM al arranque del servidor.
+- **Buscador Navbar Lazy con Debounce:** `BuscadorNavbar.jsx` optimizado para consultar al backend tras un debounce de 300ms solo al escribir $\ge 3$ caracteres, eliminando la carga masiva en `focus`.
+
+### Calidad de Código & Trazabilidad
+- **Logging Estructurado con Winston:** Migradas todas las llamadas directas de `console.error` y `console.log` a `logger.error` / `logger.info` con metadatos JSON estructurados en `authController.js`, `userController.js` y `solicitudService.js`.
+- **Insignia de Versión en Login:** Visualización dinámica de la versión actual del sistema en la pantalla de inicio de sesión (`LoginPage.jsx`).
+
+---
+
+## [1.2.0] — 2026-08-25
 ### Añadido
 - **Módulo de Geodirectorio Rural:** Buscador dinámico de productores con fichas de contacto y geolocalización en mapa interactivo de Nayarit (`053eed4`).
 - **Mesa de Control Financiera:** Consolidación de estadísticas presupuestales por sector productivo y semaforización de inversión (`9ec6b0a`).

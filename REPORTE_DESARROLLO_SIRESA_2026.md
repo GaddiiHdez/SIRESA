@@ -1,7 +1,7 @@
 # Reporte Ejecutivo de Desarrollo y Evolución del Sistema — SIRESA
 **Sistema de Registro de Información de la Secretaría de Desarrollo Rural de Nayarit**  
 **Periodo Cobertura:** Julio – Diciembre 2026  
-**Fecha de Emisión / Corte:** 25 de Agosto de 2026  
+**Fecha de Emisión / Corte:** 28 de Agosto de 2026  
 **Elaborado por:** Equipo de Desarrollo / Control de Versiones
 
 ---
@@ -92,8 +92,8 @@ gantt
 
 ---
 
-### ETAPA 5: Geodirectorio Rural, Unicidad de Beneficiarios y Mesa de Control
-* **Periodo:** 16 al 25 de Agosto de 2026 (Estado Actual)
+### ETAPA 5: Geodirectorio Rural, Unicidad de Beneficiarios y Mesa de Control (v1.2.0)
+* **Periodo:** 16 al 25 de Agosto de 2026
 * **Hitos Clave:** Commits `053eed4`, `ea0c3cd`, `5a99837`, `9ec6b0a`, `9d287d7`
 * **Objetivo & Justificación:**
   Garantizar la transparencia, eliminar duplicidad de apoyos y dar visibilidad ejecutiva al gasto público.
@@ -102,6 +102,20 @@ gantt
   - **Desduplicación Automática:** Restricción de unicidad estricta para CURP y RFC a nivel base de datos y backend.
   - **Mesa de Control Financiera:** Consolidación en tiempo real del presupuesto asignado vs. invertido por sector.
   - **Optimización de UI/UX:** Mejora de contraste, legibilidad del Hero y responsividad completa de la barra de navegación (Navbar).
+
+---
+
+### ETAPA 5.1: Auditoría Técnica, Optimización de Rendimiento y Hardening (v1.2.1)
+* **Periodo:** 26 al 28 de Agosto de 2026 (Versión Actual en Producción)
+* **Hitos Clave:** Commits `e2d7a6a`, `3512ef3`, `9e05030`
+* **Objetivo & Justificación:**
+  Asegurar la estabilidad, escalabilidad y seguridad del sistema previo a la salida a producción masiva.
+* **Actividades Realizadas:**
+  - **Logging Estructurado:** Migración de llamadas de depuración a Winston con metadata JSON estructurada.
+  - **Optimización en Base de Datos:** Incorporación de índice `rfc` en modelo `Productor` y sanitización del servicio de solicitudes.
+  - **Deduplicación Paginada:** Procesamiento en lotes de 500 registros para eliminar consumo excesivo de memoria en arranques en frío.
+  - **Buscador Lazy con Debounce:** Optimización de peticiones en frontend mediante carga reactiva de expedientes.
+  - **Control de Versión Visual:** Despliegue de insignia dinámica `v1.2.1` en la vista de acceso institucional.
 
 ---
 
