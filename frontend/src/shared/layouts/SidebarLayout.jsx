@@ -129,41 +129,66 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
         <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-nayarit-gold via-[#e3b868] to-nayarit-lightGreen" />
         
         <div className="space-y-8">
-          {/* LOGOTIPO Y BOTÓN DE COLAPSO */}
+          {/* ISOLOGO / ISOTIPO SIRESA Y BOTÓN DE COLAPSO */}
           {!isCollapsed ? (
-            <div className="flex items-center justify-between pt-2 px-1 animate-fadeIn">
-              <div className="flex items-center gap-3">
-                <div className="bg-white p-2 rounded-xl shadow-md border border-white/20 shrink-0">
-                  <img 
-                    src="/logo-sdr.png" 
-                    alt="Logo Institucional SDR Nayarit" 
-                    className="h-7 w-auto object-contain"
-                  />
+            <div className="flex items-center justify-between pt-1 px-1 animate-fadeIn">
+              <div className="flex items-center gap-2.5 min-w-0">
+                {/* Emblema Isotipo 1:1 */}
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#C29A52] via-[#dfb96f] to-[#8C6D32] p-[1.5px] shadow-lg shadow-black/25 shrink-0 flex items-center justify-center">
+                  <div className="w-full h-full bg-gradient-to-b from-[#4A0A24] to-[#250311] rounded-[10px] flex items-center justify-center relative overflow-hidden">
+                    <div className="absolute inset-0 bg-radial from-amber-400/20 to-transparent pointer-events-none" />
+                    <span className="font-black text-base text-transparent bg-clip-text bg-gradient-to-b from-white via-amber-100 to-amber-300 font-sans tracking-tighter">
+                      S
+                    </span>
+                  </div>
+                </div>
+
+                {/* Tipografía de Marca Institucional */}
+                <div className="flex flex-col min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-black text-sm tracking-wider text-white font-sans leading-none">
+                      SIRESA
+                    </span>
+                    <span className="text-[8px] font-black px-1.5 py-0.25 bg-[#C29A52]/25 text-amber-300 border border-[#C29A52]/40 rounded-md tracking-tight leading-none">
+                      v1.2.1
+                    </span>
+                  </div>
+                  <span className="text-[9px] text-amber-200/80 font-bold uppercase tracking-widest leading-none mt-1 truncate">
+                    Desarrollo Rural
+                  </span>
                 </div>
               </div>
+
               <button 
                 onClick={() => setIsCollapsed(true)} 
-                className="p-1.5 hover:bg-white/10 rounded-lg transition-smooth"
+                className="p-1.5 hover:bg-white/10 text-white/70 hover:text-white rounded-lg transition-smooth cursor-pointer shrink-0"
                 title="Contraer menú"
               >
-                <ChevronLeft className="w-4.5 h-4.5 text-slate-300" />
+                <ChevronLeft className="w-4 h-4" />
               </button>
             </div>
           ) : (
-            <div className="flex flex-col items-center gap-4 pt-2">
-              <div className="bg-white p-1.5 rounded-xl shadow-md border border-white/20 shrink-0">
-                <img 
-                  src="/logo-sdr.png" 
-                  alt="Logo SDR" 
-                  className="h-6 w-auto object-contain"
-                />
+            <div className="flex flex-col items-center gap-4 pt-1">
+              {/* Isotipo 1:1 en modo colapsado */}
+              <div 
+                className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#C29A52] via-[#dfb96f] to-[#8C6D32] p-[1.5px] shadow-lg shadow-black/30 shrink-0 flex items-center justify-center cursor-pointer group"
+                onClick={() => setIsCollapsed(false)}
+                title="SIRESA — Expandir menú"
+              >
+                <div className="w-full h-full bg-gradient-to-b from-[#4A0A24] to-[#250311] group-hover:from-[#5d0e2f] group-hover:to-[#330419] rounded-[10px] flex items-center justify-center transition-smooth relative overflow-hidden">
+                  <div className="absolute inset-0 bg-radial from-amber-400/20 to-transparent pointer-events-none" />
+                  <span className="font-black text-lg text-transparent bg-clip-text bg-gradient-to-b from-white via-amber-100 to-amber-300 font-sans tracking-tighter">
+                    S
+                  </span>
+                </div>
               </div>
+
               <button 
                 onClick={() => setIsCollapsed(false)} 
-                className="p-1.5 hover:bg-white/10 rounded-lg transition-smooth"
+                className="p-1.5 hover:bg-white/10 text-white/70 hover:text-white rounded-lg transition-smooth cursor-pointer"
                 title="Expandir menú"
               >
-                <Menu className="w-5 h-5 text-slate-300" />
+                <Menu className="w-5 h-5" />
               </button>
             </div>
           )}
