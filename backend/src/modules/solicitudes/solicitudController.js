@@ -156,7 +156,7 @@ export async function actualizarDocumentos(req, res) {
     const updated = await service.updateSolicitudDocumentos(id, req.body);
     res.json(updated);
   } catch (error) {
-    console.error('Error al actualizar documentos:', error);
+    logger.error('Error al actualizar documentos:', { error: error.message, solicitudId: id });
     res.status(500).json({ error: 'Error interno al actualizar los documentos del expediente.' });
   }
 }

@@ -37,6 +37,12 @@ Todas las modificaciones, actualizaciones, correcciones y nuevas funcionalidades
 - **Habilitación de Permisos RBAC:** Corrección del control de permisos para permitir a `SUPERADMIN` y `ADMINISTRADOR` configurar presupuestos desde el header, tarjetas individuales y navbar.
 - **Controlador Robusto con Upsert y Limpieza de Caché:** `presupuestoController.js` mejorado con `prisma.presupuestoSector.upsert` e invalidación inmediata de caché de estadísticas.
 
+### Gestión Documental & Expedientes
+- **Auto-guardado Inmediato de Documentos:** `ExpedienteDetalleModal.jsx` y `apiActualizarDocumentos` corregidos para sincronizar y persistir automáticamente cualquier documento digitalizado en la base de datos de PostgreSQL al momento de subirlo.
+- **Normalización de Payload en Backend:** `solicitudService.js`, `solicitudController.js` y `solicitudSchemas.js` adaptados para soportar payloads directos o anidados en `PATCH /api/solicitudes/:id/documentos` con invalidación de caché.
+- **Feedback & Trazabilidad UX:** Toasts de confirmación descriptivos al cargar cada archivo (`✓ [Documento] cargado y guardado en el expediente`) y mensaje de cierre de expediente, con sincronización de tablas en tiempo real vía eventos globales.
+- **Resolución de Carga Infinita en Drawer:** Corrección de la prop `sectorKey` vs `sector` en `DrawerLateralSector.jsx` y manejo seguro de estados de carga y relaciones en `DrawerLateralProductores.jsx`.
+
 ### Calidad de Código & Trazabilidad
 - **Logging Estructurado con Winston:** Migradas todas las llamadas directas de `console.error` y `console.log` a `logger.error` / `logger.info` con metadatos JSON estructurados en `authController.js`, `userController.js` y `solicitudService.js`.
 - **Insignia de Versión en Login:** Visualización dinámica de la versión actual del sistema en la pantalla de inicio de sesión (`LoginPage.jsx`).

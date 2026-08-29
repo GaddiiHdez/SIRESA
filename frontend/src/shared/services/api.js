@@ -280,10 +280,11 @@ export async function apiActualizarEstatus(id, estatus, comentario) {
  * @returns {Promise<Object>} El expediente actualizado
  */
 export async function apiActualizarDocumentos(id, documentos) {
+  const payload = documentos?.documentos || documentos || {};
   const res = await fetch(`${API_URL}/solicitudes/${id}/documentos`, {
     method: 'PATCH',
     headers: getAuthHeaders(),
-    body: JSON.stringify({ documentos })
+    body: JSON.stringify(payload)
   });
   return handleResponse(res, 'Error al actualizar documentos.');
 }

@@ -81,9 +81,16 @@ export default function DashboardPage() {
       loadData();
     };
 
+    const onGlobalUpdate = () => {
+      loadData();
+    };
+
     window.addEventListener('sdr-navbar-action-actualizar', onActualizar);
+    window.addEventListener('sdr-solicitud-updated', onGlobalUpdate);
+
     return () => {
       window.removeEventListener('sdr-navbar-action-actualizar', onActualizar);
+      window.removeEventListener('sdr-solicitud-updated', onGlobalUpdate);
     };
   }, []);
 

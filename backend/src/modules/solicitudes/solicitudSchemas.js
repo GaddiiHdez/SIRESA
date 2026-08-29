@@ -153,5 +153,12 @@ export const actualizarDocumentosSchema = z.object({
   curpUrl: z.string().max(500).optional().nullable(),
   rfcUrl: z.string().max(500).optional().nullable(),
   comprobanteUrl: z.string().max(500).optional().nullable(),
-  facturaUrl: z.string().max(500).optional().nullable()
-});
+  facturaUrl: z.string().max(500).optional().nullable(),
+  documentos: z.object({
+    ineUrl: z.string().max(500).optional().nullable(),
+    curpUrl: z.string().max(500).optional().nullable(),
+    rfcUrl: z.string().max(500).optional().nullable(),
+    comprobanteUrl: z.string().max(500).optional().nullable(),
+    facturaUrl: z.string().max(500).optional().nullable()
+  }).optional().nullable()
+}).passthrough();

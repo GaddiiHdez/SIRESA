@@ -177,6 +177,12 @@ export default function ConsultaExpedientesPage() {
     };
     loadData();
 
+    const handleGlobalUpdate = () => {
+      fetchSolicitudes();
+    };
+
+    window.addEventListener('sdr-solicitud-updated', handleGlobalUpdate);
+
     window.dispatchEvent(new CustomEvent('sdr-navbar-update', {
       detail: {
         label: "BÚSQUEDA Y SEGUIMIENTO",
@@ -187,6 +193,10 @@ export default function ConsultaExpedientesPage() {
         ] : []
       }
     }));
+
+    return () => {
+      window.removeEventListener('sdr-solicitud-updated', handleGlobalUpdate);
+    };
   }, [location.search, location.state]);
 
   const handleSearch = (e) => {

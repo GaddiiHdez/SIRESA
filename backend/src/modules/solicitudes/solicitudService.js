@@ -591,18 +591,38 @@ export async function updateSolicitudEstatus(id, estatus, comentario, user) {
  * @param {Object} documents - Objeto con las URLs de los documentos
  */
 export async function updateSolicitudDocumentos(id, documents) {
-  const { ineUrl, curpUrl, rfcUrl, comprobanteUrl, facturaUrl } = documents;
+  // Soporta tanto payload plano como anidado en { documentos: { ... } }
+  const docs = documents?.documentos || documents || {};
+  const { ineUrl, curpUrl, rfcUrl, comprobanteUrl, facturaUrl } = docs;
 
-  return await prisma.solicitud.update({
+  const dataToUpdate = {};
+  if (ineUrl !== undefined) dataToUpdate.ineUrl = nn(ineUrl);
+  if (curpUrl !== undefined) dataToUpdate.curpUrl = nn(curpUrl);
+  if (rfcUrl !== undefined) dataToUpdate.rfcUrl = nn(rfcUrl);
+  if (comprobanteUrl !== undefined) dataToUpdate.comprobanteUrl = nn(comprobanteUrl);
+  if (facturaUrl !== undefined) dataToUpdate.facturaUrl = nn(facturaUrl);
+
+  const updated = await prisma.solicitud.update({
     where: { id },
-    data: {
-      ineUrl: nn(ineUrl),
-      curpUrl: nn(curpUrl),
-      rfcUrl: nn(rfcUrl),
-      comprobanteUrl: nn(comprobanteUrl),
-      facturaUrl: nn(facturaUrl)
+    data: dataToUpdate,
+    include: {
+      productor: true,
+      apoyoControl: true,
+      datosAgriculturaFrijol: true,
+      datosGanaderia: true,
+      datosPescaAcuacultura: true,
+      datosInfraestructura: true,
+      datosMaquinaria: true,
+      datosMedios: true,
+      datosTemasImportantes: true,
+      historialEstatus: {
+        orderBy: { fechaChange: 'desc' }
+      }
     }
   });
+
+  clearStatsCache();
+  return updated;
 }
 
 // ─── Cache de Estadísticas ───────────────────────────────────────────────────
