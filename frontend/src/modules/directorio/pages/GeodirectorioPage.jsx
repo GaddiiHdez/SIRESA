@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { apiGetDirectorioGeo, apiGetSolicitud, apiGetCatalogos, getCurrentUser } from '../../../shared/services/api';
-import { Compass, Search, MapPin, Building, Users, Layers, Filter, RefreshCw, Sparkles, ChevronRight, X, Phone, FileText } from 'lucide-react';
+import { Compass, Search, MapPin, Building, Users, Layers, Filter, RefreshCw, Sparkles, ChevronRight, X, Phone, FileText, Download, FileSpreadsheet } from 'lucide-react';
 import MapaDirectorioReal from '../components/MapaDirectorioReal';
 import FichaContactoDrawer from '../components/FichaContactoDrawer';
 import ExpedienteDetalleModal from '../../solicitudes/components/ExpedienteDetalleModal';
@@ -30,6 +30,76 @@ export default function GeodirectorioPage() {
   const [newEstatus, setNewEstatus] = useState('');
   const [estatusComentario, setEstatusComentario] = useState('');
   const [updateLoading, setUpdateLoading] = useState(false);
+
+  // Exportar Excel/CSV de la Ruta de Campo para Personal SEDER
+  const handleExportRutaCampo = () => {
+    if (!puntos || puntos.length === 0) {
+      toast.error('No hay puntos en el mapa para exportar.');
+      return;
+    }
+
+    const headers = [
+      "Municipio",
+      "Localidad",
+      "Categoria Punto",
+      "Folio Expediente",
+      "Sector / Modulo",
+      "Productor / Razon Social",
+      "Tipo Persona",
+      "CURP / RFC",
+      "Telefono",
+      "Domicilio",
+      "Predio / UPP",
+      "Latitud",
+      "Longitud",
+      "Enlace Google Maps GPS",
+      "Concepto Apoyo",
+      "Monto Solicitado",
+      "Estatus"
+    ];
+
+    const rows = puntos.map(p => {
+      const prod = p.productor || {};
+      const gan = p.ganaderia || {};
+      const ap = p.apoyo || {};
+      const coords = p.coordenadas || {};
+      const mapsLink = coords.lat && coords.lng ? `https://www.google.com/maps/search/?api=1&query=${coords.lat},${coords.lng}` : '';
+
+      return [
+        `"${prod.municipio || gan.municipio || municipio || 'Nayarit'}"`,
+        `"${prod.localidad || gan.localidad || ''}"`,
+        `"${p.categoriaPunto || 'PRODUCTOR'}"`,
+        `"${p.folio || ''}"`,
+        `"${p.moduloTipo || ''}"`,
+        `"${(prod.nombreCompleto || gan.nombrePredio || 'Sin Nombre').replace(/"/g, '""')}"`,
+        `"${prod.tipoPersona || ''}"`,
+        `"${prod.curp || prod.rfc || ''}"`,
+        `"${prod.telefono || ''}"`,
+        `"${(prod.domicilio || '').replace(/"/g, '""')}"`,
+        `"${gan.upp || gan.nombrePredio || ''}"`,
+        coords.lat || '',
+        coords.lng || '',
+        `"${mapsLink}"`,
+        `"${(ap.concepto || '').replace(/"/g, '""')}"`,
+        ap.montoTotal || 0,
+        `"${p.status || ''}"`
+      ];
+    });
+
+    const csvContent = "\uFEFF" + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    const munLabel = municipio ? municipio.replace(/\s+/g, '_') : 'Estatal';
+    const filename = `Ruta_Campo_SEDER_${munLabel}_${new Date().toISOString().split('T')[0]}.csv`;
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    toast.success(`✓ Exportada Ruta de Campo (${puntos.length} contactos) para ${municipio || 'Nayarit'}`);
+  };
 
   const fetchCatalogos = async () => {
     try {
@@ -196,20 +266,30 @@ export default function GeodirectorioPage() {
         </div>
 
         {/* SELECTOR DE MUNICIPIO Y CONTADORES */}
-        <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
+        <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto justify-between md:justify-end">
           <select
             value={municipio}
             onChange={e => setMunicipio(e.target.value)}
             className="px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 outline-none focus:border-nayarit-burgundy transition-all"
           >
-            <option value="">Todos los Municipios</option>
+            <option value="">Todos los Municipios (Estatal)</option>
             {catalogos.municipios?.map(m => (
               <option key={m} value={m}>{m}</option>
             ))}
           </select>
 
+          {/* BOTÓN EXPORTAR RUTA DE CAMPO PARA GIRA */}
+          <button
+            onClick={handleExportRutaCampo}
+            className="flex items-center gap-2 px-3.5 py-2.5 bg-gradient-to-r from-[#5E1232] to-[#420921] hover:from-[#430922] hover:to-[#250311] text-white rounded-xl text-xs font-extrabold transition-all shadow-sm cursor-pointer border border-[#C29A52]/30 active:scale-95"
+            title="Exportar itinerario de visitas y contactos con enlaces GPS a Excel/CSV"
+          >
+            <FileSpreadsheet size={15} className="text-nayarit-gold shrink-0" />
+            <span>Exportar Ruta de Campo</span>
+          </button>
+
           {/* MÉTRICAS RÁPIDAS */}
-          <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700">
+          <div className="flex items-center gap-2 bg-slate-50 px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-700">
             <MapPin size={14} className="text-nayarit-burgundy" />
             <span>{stats.total} Puntos</span>
           </div>

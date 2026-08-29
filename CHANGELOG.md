@@ -43,6 +43,8 @@ Todas las modificaciones, actualizaciones, correcciones y nuevas funcionalidades
 - **Feedback & Trazabilidad UX:** Toasts de confirmación descriptivos al cargar cada archivo (`✓ [Documento] cargado y guardado en el expediente`) y mensaje de cierre de expediente, con sincronización de tablas en tiempo real vía eventos globales.
 - **Resolución de Carga Infinita en Drawer:** Corrección de la prop `sectorKey` vs `sector` en `DrawerLateralSector.jsx` y manejo seguro de estados de carga y relaciones en `DrawerLateralProductores.jsx`.
 - **Centro de Alertas & Notificaciones Inteligente:** `CentroNotificacionesMenu.jsx` rediseñado con soporte de pestañas (*Todas*, *Por Dictaminar*, *Docs Faltantes*), resolución correcta de nombres de productores físicos y morales, insignias por sector con color institucional, indicador de documentos faltantes y botón de enlace directo a la consulta de expedientes.
+- **Herramienta de Ruta de Campo SEDER (Geodirectorio):** Añadido generador de itinerarios de visita de campo (`GeodirectorioPage.jsx`) para exportar contactos, domicilios, teléfonos, predios/UPPs y enlaces de navegación GPS directos a Google Maps (en formato Excel/CSV con BOM UTF-8) por municipio o nivel estatal.
+- **Navegación GPS In-Situ & Corrección de Capas:** Botón de navegación directa a Google Maps en `FichaContactoDrawer.jsx` y ajuste de jerarquía de capas z-index (`z-[9999]` en menú de notificaciones vs `z-20` en visor de mapa) para eliminar superposición visual.
 
 ### Calidad de Código & Trazabilidad
 - **Logging Estructurado con Winston:** Migradas todas las llamadas directas de `console.error` y `console.log` a `logger.error` / `logger.info` con metadatos JSON estructurados en `authController.js`, `userController.js` y `solicitudService.js`.

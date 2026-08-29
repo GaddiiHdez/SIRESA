@@ -64,7 +64,7 @@ export default function MapaDirectorioReal({
     <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-lg border border-slate-200 bg-slate-900">
       
       {/* ── CONTROLES FLOTANTES DEL MAPA ────────────────────────────────────────── */}
-      <div className="absolute top-4 right-4 z-[1000] flex flex-col gap-2 bg-slate-900/90 backdrop-blur-md p-3 rounded-2xl border border-white/10 shadow-xl text-xs text-white">
+      <div className="absolute top-4 right-4 z-20 flex flex-col gap-2 bg-slate-900/90 backdrop-blur-md p-3 rounded-2xl border border-white/10 shadow-xl text-xs text-white">
         <div className="flex items-center gap-2 pb-2 border-b border-white/10 font-bold uppercase tracking-wider text-[10px] text-amber-400">
           <Layers size={14} /> Capas y Visor
         </div>

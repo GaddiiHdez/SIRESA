@@ -120,7 +120,7 @@ export default function CentroNotificacionesMenu({ onSelectExpediente }) {
 
       {/* MENÚ DESPLEGABLE */}
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-84 sm:w-96 md:w-[420px] bg-white rounded-3xl shadow-2xl ring-1 ring-slate-900/10 border border-slate-200 z-[999] overflow-hidden animate-scaleUp">
+        <div className="absolute right-0 mt-3 w-84 sm:w-96 md:w-[420px] bg-white rounded-3xl shadow-2xl ring-1 ring-slate-900/10 border border-slate-200 z-[9999] overflow-hidden animate-scaleUp">
           
           {/* Cabecera Guinda Institucional */}
           <div className="p-4 bg-gradient-to-r from-[#5E1232] via-[#480c25] to-[#250311] text-white flex items-center justify-between shadow-xs">

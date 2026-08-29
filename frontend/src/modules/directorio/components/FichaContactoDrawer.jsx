@@ -92,31 +92,45 @@ export default function FichaContactoDrawer({ punto, onClose, onVerExpediente })
             </p>
           </div>
 
-          {/* ACCIONES DE CONTACTO DIRECTO */}
-          <div className="pt-2 flex gap-2">
-            {productor?.telefono ? (
-              <>
-                <a
-                  href={`tel:${cleanPhone}`}
-                  className="flex-1 py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-sm"
-                >
-                  <Phone size={14} /> Llamar ({productor.telefono})
-                </a>
-                {whatsappUrl && (
-                  <a
-                    href={whatsappUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="p-2.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 rounded-xl font-bold text-xs flex items-center justify-center transition-all border border-emerald-500/30"
-                    title="Enviar WhatsApp"
-                  >
-                    <MessageCircle size={16} />
-                  </a>
-                )}
-              </>
-            ) : (
-              <p className="text-xs text-slate-400 italic">No hay teléfono registrado para este contacto.</p>
+          {/* ACCIONES DE NAVEGACIÓN Y CONTACTO DIRECTO */}
+          <div className="pt-2 flex flex-col gap-2">
+            {coordenadas && (
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${coordenadas.lat},${coordenadas.lng}`}
+                target="_blank"
+                rel="noreferrer"
+                className="w-full py-2.5 px-3 bg-[#5E1232] hover:bg-[#430922] text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer"
+              >
+                <Compass size={15} className="text-nayarit-gold" />
+                <span>Navegar con GPS (Google Maps)</span>
+              </a>
             )}
+
+            <div className="flex gap-2">
+              {productor?.telefono ? (
+                <>
+                  <a
+                    href={`tel:${cleanPhone}`}
+                    className="flex-1 py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-sm"
+                  >
+                    <Phone size={14} /> Llamar ({productor.telefono})
+                  </a>
+                  {whatsappUrl && (
+                    <a
+                      href={whatsappUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="p-2.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 rounded-xl font-bold text-xs flex items-center justify-center transition-all border border-emerald-500/30"
+                      title="Enviar WhatsApp"
+                    >
+                      <MessageCircle size={16} />
+                    </a>
+                  )}
+                </>
+              ) : (
+                <p className="text-[11px] text-slate-400 italic py-1">No hay teléfono registrado para este contacto.</p>
+              )}
+            </div>
           </div>
         </div>
 
