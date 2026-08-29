@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import FormInput from '../../../shared/components/FormInput';
 import FormSelect from '../../../shared/components/FormSelect';
+import SelectorUbicacionMapa from '../../../shared/components/SelectorUbicacionMapa';
 
 export default function FormGanaderia({ datosEspecif, onChange, catalogos }) {
   const [localidadesFiltradas, setLocalidadesFiltradas] = useState([]);
@@ -41,21 +42,19 @@ export default function FormGanaderia({ datosEspecif, onChange, catalogos }) {
           required
         />
 
-        <FormInput
-          label="Coordenada Latitud (Norte)"
-          value={datosEspecif.latitudN}
-          onChange={val => onChange('latitudN', val)}
-          placeholder={"Ej. 21°30'15\""}
-          required
-        />
-
-        <FormInput
-          label="Coordenada Longitud (Oeste)"
-          value={datosEspecif.longitudW}
-          onChange={val => onChange('longitudW', val)}
-          placeholder={"Ej. 104°53'45\""}
-          required
-        />
+        <div className="md:col-span-2">
+          <SelectorUbicacionMapa
+            latitud={datosEspecif.latitudN}
+            longitud={datosEspecif.longitudW}
+            municipio={datosEspecif.municipio}
+            onCoordsChange={(lat, lng) => {
+              onChange('latitudN', lat);
+              onChange('longitudW', lng);
+            }}
+            required
+            label="Geolocalización Satelital del Predio / UPP Ganadera"
+          />
+        </div>
 
         <FormInput
           label="Folio Credencial Ganadera"

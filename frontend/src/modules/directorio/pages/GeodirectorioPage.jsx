@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { apiGetDirectorioGeo, apiGetSolicitud, apiGetCatalogos, getCurrentUser } from '../../../shared/services/api';
-import { Compass, Search, MapPin, Building, Users, Layers, Filter, RefreshCw, Sparkles, ChevronRight, X, Phone, FileText, Download, FileSpreadsheet } from 'lucide-react';
+import { Compass, Search, MapPin, Building, Users, Layers, Filter, RefreshCw, Sparkles, ChevronRight, X, Phone, FileText, Download, FileSpreadsheet, BarChart3 } from 'lucide-react';
 import MapaDirectorioReal from '../components/MapaDirectorioReal';
 import FichaContactoDrawer from '../components/FichaContactoDrawer';
 import ExpedienteDetalleModal from '../../solicitudes/components/ExpedienteDetalleModal';
@@ -8,14 +9,17 @@ import { toast } from '../../../shared/utils/toast';
 
 export default function GeodirectorioPage() {
   const currentUser = getCurrentUser();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const [puntos, setPuntos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [catalogos, setCatalogos] = useState({ municipios: [] });
 
-  // Filtros
+  // Filtros inicializados con query param si viene de Estadísticas
+  const paramMuni = searchParams.get('municipio') || '';
   const [search, setSearch] = useState('');
-  const [municipio, setMunicipio] = useState('');
+  const [municipio, setMunicipio] = useState(paramMuni);
   const [capaActiva, setCapaActiva] = useState('ALL'); // 'ALL' | 'PRODUCTOR' | 'UPP' | 'PSG'
 
   // Selección de Punto para la Ficha Lateral
@@ -286,6 +290,16 @@ export default function GeodirectorioPage() {
           >
             <FileSpreadsheet size={15} className="text-nayarit-gold shrink-0" />
             <span>Exportar Ruta de Campo</span>
+          </button>
+
+          {/* BOTÓN ENLACE A ESTADÍSTICAS */}
+          <button
+            onClick={() => navigate('/estadisticas')}
+            className="flex items-center gap-1.5 px-3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all border border-slate-200 cursor-pointer"
+            title="Ver mapa de calor y análisis municipal"
+          >
+            <BarChart3 size={15} className="text-nayarit-gold shrink-0" />
+            <span className="hidden sm:inline">Ver Estadísticas</span>
           </button>
 
           {/* MÉTRICAS RÁPIDAS */}

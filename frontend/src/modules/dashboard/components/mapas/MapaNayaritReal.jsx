@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Popup, Tooltip } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import { MapPin, DollarSign, FileText, ChevronRight } from 'lucide-react';
+import { MapPin, DollarSign, FileText, ChevronRight, Compass, ArrowUpRight } from 'lucide-react';
 import { formatMoneda } from '../../../../shared/utils/formatters';
 import { useNavigate } from 'react-router-dom';
 
@@ -171,12 +171,21 @@ export default function MapaNayaritReal({ municipios = [] }) {
                       <p className="text-slate-600">
                         Inversión: <strong className="text-nayarit-dark">{formatMoneda(data ? data.inversion : 0)}</strong>
                       </p>
-                      <button
-                        onClick={() => handleMuniClick(muni.name)}
-                        className="w-full mt-2 px-3 py-1.5 bg-[#5E1232] text-white rounded-xl text-[11px] font-bold uppercase tracking-wider hover:bg-[#480c25] transition-smooth cursor-pointer"
-                      >
-                        Ver Expedientes en {muni.name}
-                      </button>
+                      <div className="flex flex-col gap-1.5 pt-1">
+                        <button
+                          onClick={() => handleMuniClick(muni.name)}
+                          className="w-full px-3 py-1.5 bg-[#5E1232] text-white rounded-xl text-[11px] font-bold uppercase tracking-wider hover:bg-[#480c25] transition-smooth cursor-pointer"
+                        >
+                          Ver Expedientes ({data ? data.count : 0})
+                        </button>
+                        <button
+                          onClick={() => navigate(`/geodirectorio?municipio=${encodeURIComponent(muni.name)}`)}
+                          className="w-full px-3 py-1.5 bg-slate-900 text-amber-300 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1 hover:bg-slate-800 transition-smooth cursor-pointer"
+                        >
+                          <Compass size={13} className="text-nayarit-gold" />
+                          <span>Ver en Geodirectorio</span>
+                        </button>
+                      </div>
                     </div>
                   </Popup>
                 </CircleMarker>
@@ -220,11 +229,11 @@ export default function MapaNayaritReal({ municipios = [] }) {
                 </div>
 
                 <div className="bg-white/5 rounded-2xl p-4 border border-white/10">
-                  <span className="text-[11px] text-slate-400 font-semibold block uppercase tracking-wider">Monto Solicitado</span>
-                  <span className="text-xl font-bold text-nayarit-lightGold mt-1 block">
+                  <span className="text-[11px] text-slate-400 font-semibold block uppercase tracking-wider">Inversión</span>
+                  <span className="text-xl font-bold text-nayarit-lightGold mt-1 block truncate">
                     {formatMoneda(activeData ? activeData.inversion : 0)}
                   </span>
-                  <span className="text-[10px] text-slate-400 mt-0.5 block">Presupuesto solicitado</span>
+                  <span className="text-[10px] text-slate-400 mt-0.5 block">Monto total solicitado</span>
                 </div>
               </div>
 
@@ -252,13 +261,22 @@ export default function MapaNayaritReal({ municipios = [] }) {
               )}
 
               {selectedMuni && (
-                <div className="pt-2">
+                <div className="pt-2 flex flex-col gap-2">
                   <button
                     onClick={() => handleMuniClick(selectedMuni)}
-                    className="w-full flex items-center justify-center gap-2 px-5 py-3 bg-nayarit-gold hover:bg-[#e3b868] text-[#200210] rounded-2xl text-xs font-extrabold uppercase tracking-wider transition-smooth shadow-md cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+                    className="w-full flex items-center justify-center gap-2 px-5 py-3 bg-nayarit-gold hover:bg-[#e3b868] text-[#200210] rounded-2xl text-xs font-extrabold uppercase tracking-wider transition-smooth shadow-md cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
                   >
                     <span>Consultar Expedientes en {selectedMuni}</span>
                     <ChevronRight className="w-4 h-4" />
+                  </button>
+
+                  <button
+                    onClick={() => navigate(`/geodirectorio?municipio=${encodeURIComponent(selectedMuni)}`)}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-2xl text-xs font-bold transition-smooth border border-white/15 cursor-pointer"
+                  >
+                    <Compass className="w-4 h-4 text-nayarit-gold" />
+                    <span>Explorar Puntos en Geodirectorio {selectedMuni}</span>
+                    <ArrowUpRight className="w-4 h-4 text-slate-300" />
                   </button>
                 </div>
               )}
