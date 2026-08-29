@@ -42,6 +42,7 @@ Todas las modificaciones, actualizaciones, correcciones y nuevas funcionalidades
 - **Normalización de Payload en Backend:** `solicitudService.js`, `solicitudController.js` y `solicitudSchemas.js` adaptados para soportar payloads directos o anidados en `PATCH /api/solicitudes/:id/documentos` con invalidación de caché.
 - **Feedback & Trazabilidad UX:** Toasts de confirmación descriptivos al cargar cada archivo (`✓ [Documento] cargado y guardado en el expediente`) y mensaje de cierre de expediente, con sincronización de tablas en tiempo real vía eventos globales.
 - **Resolución de Carga Infinita en Drawer:** Corrección de la prop `sectorKey` vs `sector` en `DrawerLateralSector.jsx` y manejo seguro de estados de carga y relaciones en `DrawerLateralProductores.jsx`.
+- **Centro de Alertas & Notificaciones Inteligente:** `CentroNotificacionesMenu.jsx` rediseñado con soporte de pestañas (*Todas*, *Por Dictaminar*, *Docs Faltantes*), resolución correcta de nombres de productores físicos y morales, insignias por sector con color institucional, indicador de documentos faltantes y botón de enlace directo a la consulta de expedientes.
 
 ### Calidad de Código & Trazabilidad
 - **Logging Estructurado con Winston:** Migradas todas las llamadas directas de `console.error` y `console.log` a `logger.error` / `logger.info` con metadatos JSON estructurados en `authController.js`, `userController.js` y `solicitudService.js`.
