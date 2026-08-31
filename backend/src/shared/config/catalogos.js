@@ -1,3 +1,11 @@
+export const SECTORES_DEFAULT = [
+  { key: 'GANADERIA', label: 'Ganadería y Pecuario' },
+  { key: 'AGRICULTURA_FRIJOL', label: 'Agricultura / Granos' },
+  { key: 'PESCA_ACUACULTURA', label: 'Pesca y Acuacultura' },
+  { key: 'INFRAESTRUCTURA', label: 'Infraestructura Rural' },
+  { key: 'MAQUINARIA', label: 'Maquinaria y Equipo' }
+];
+
 export const PROGRAMAS_COMPONENTES = {
   AGRICULTURA_FRIJOL: {
     programa: "Programa de Fomento Agrícola (SDR-AGRI)",
