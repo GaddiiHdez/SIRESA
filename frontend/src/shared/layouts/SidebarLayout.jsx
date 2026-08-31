@@ -141,6 +141,83 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
     }
   };
 
+  const ROUTE_NAVBAR_CONFIG = {
+    '/': {
+      label: 'SDR NAYARIT',
+      title: 'MESA DE CONTROL Y DICTAMEN',
+      subtitle: 'Seguimiento operativo y trámites de apoyo',
+      iconKey: 'DASHBOARD',
+      active: false
+    },
+    '/estadisticas': {
+      label: 'ANALÍTICA ESTRATÉGICA',
+      title: 'ESTADÍSTICAS Y ANÁLISIS FINANCIERO',
+      subtitle: 'Métricas de inversión y cobertura estatal',
+      iconKey: 'ESTADISTICAS',
+      active: false
+    },
+    '/registrar': {
+      label: 'SDR NAYARIT',
+      title: 'NUEVA SOLICITUD DE APOYO',
+      subtitle: 'Registro y captura de expediente',
+      iconKey: 'REGISTRO',
+      active: true
+    },
+    '/consultar': {
+      label: 'SDR NAYARIT',
+      title: 'CONSULTA DE EXPEDIENTES',
+      subtitle: 'Padrón y seguimiento de solicitudes',
+      iconKey: 'CONSULTA',
+      active: false
+    },
+    '/productores': {
+      label: 'SDR NAYARIT',
+      title: 'PADRÓN DE PRODUCTORES',
+      subtitle: 'Directorio de productores y colectivos rurales',
+      iconKey: 'PRODUCTORES',
+      active: false
+    },
+    '/directorio': {
+      label: 'SDR NAYARIT',
+      title: 'GEODIRECTORIO RURAL',
+      subtitle: 'Mapa interactivo y distribución geográfica',
+      iconKey: 'DIRECTORIO',
+      active: false
+    },
+    '/reportes': {
+      label: 'SDR NAYARIT',
+      title: 'REPORTES EJECUTIVOS DE INVERSIÓN',
+      subtitle: 'Cédula oficial e informe presupuestal por sector',
+      iconKey: 'REPORTES',
+      active: false
+    },
+    '/bitacora': {
+      label: 'SEGURIDAD Y CONTROL',
+      title: 'BITÁCORA DE AUDITORÍA',
+      subtitle: 'Registro de trazabilidad y eventos del sistema',
+      iconKey: 'BITACORA',
+      active: false
+    },
+    '/usuarios': {
+      label: 'ADMINISTRACIÓN',
+      title: 'GESTIÓN DE USUARIOS',
+      subtitle: 'Control de cuentas y asignación de roles',
+      iconKey: 'USUARIOS',
+      active: false
+    }
+  };
+
+  useEffect(() => {
+    const config = ROUTE_NAVBAR_CONFIG[currentPath];
+    if (config) {
+      setCaptureState(prev => ({
+        ...prev,
+        ...config,
+        actions: []
+      }));
+    }
+  }, [currentPath]);
+
   useEffect(() => {
     const handleNavbarUpdate = (e) => {
       setCaptureState(prev => ({
@@ -155,10 +232,17 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
   }, []);
 
   let IconComponent = ShieldCheck;
-  if (captureState.iconKey === 'DASHBOARD') IconComponent = BarChart3;
+  if (captureState.iconKey === 'DASHBOARD') IconComponent = LayoutDashboard;
   else if (captureState.iconKey === 'CONSULTA') IconComponent = FileSpreadsheet;
   else if (captureState.iconKey === 'REGISTRO') IconComponent = PlusCircle;
-  else if (captureState.iconKey) IconComponent = getSectorIcon(captureState.iconKey);
+  else if (captureState.iconKey === 'ESTADISTICAS') IconComponent = PieChart;
+  else if (captureState.iconKey === 'PRODUCTORES') IconComponent = Users;
+  else if (captureState.iconKey === 'DIRECTORIO') IconComponent = Compass;
+  else if (captureState.iconKey === 'REPORTES') IconComponent = Landmark;
+  else if (captureState.iconKey === 'BITACORA') IconComponent = ShieldAlert;
+  else if (captureState.iconKey === 'USUARIOS') IconComponent = ShieldCheck;
+  else if (captureState.iconKey) IconComponent = getSectorIcon(captureState.iconKey) || ShieldCheck;
+
 
   return (
     <div className="h-screen w-screen flex bg-nayarit-light text-slate-700 overflow-hidden print:h-auto print:w-full print:overflow-visible print:block print:bg-white">

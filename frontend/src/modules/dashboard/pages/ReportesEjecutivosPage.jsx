@@ -48,7 +48,16 @@ export default function ReportesEjecutivosPage() {
 
   useEffect(() => {
     fetchCatalogos();
+    window.dispatchEvent(new CustomEvent('sdr-navbar-update', {
+      detail: {
+        label: "SDR NAYARIT",
+        title: "REPORTES EJECUTIVOS DE INVERSIÓN",
+        subtitle: "Cédula oficial e informe presupuestal por sector",
+        iconKey: "REPORTES"
+      }
+    }));
   }, []);
+
 
   useEffect(() => {
     fetchReporte();

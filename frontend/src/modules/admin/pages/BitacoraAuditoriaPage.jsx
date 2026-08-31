@@ -66,7 +66,16 @@ export default function BitacoraAuditoriaPage() {
 
   useEffect(() => {
     fetchStats();
+    window.dispatchEvent(new CustomEvent('sdr-navbar-update', {
+      detail: {
+        label: "SEGURIDAD Y CONTROL",
+        title: "BITÁCORA DE AUDITORÍA",
+        subtitle: "Registro de trazabilidad y eventos del sistema",
+        iconKey: "BITACORA"
+      }
+    }));
   }, []);
+
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
