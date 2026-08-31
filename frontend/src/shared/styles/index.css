@@ -13,6 +13,10 @@
 }
 
 /* Estilos de Base Institucional */
+html {
+  font-size: 85%; /* Reduce el tamaño general del texto y elementos rem en un 15% para una densidad compacta y elegante */
+}
+
 body {
   background-color: #F8FAFC;
   color: #1E293B;
@@ -21,6 +25,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
 
 
 /* Efectos de Glassmorphism Premium */
