@@ -80,22 +80,52 @@ body {
   background: #94a3b8;
 }
 
-/* Transiciones entre Pasos del Wizard */
-.wizard-step-enter {
-  opacity: 0;
-  transform: translateX(10px);
-}
-.wizard-step-enter-active {
-  opacity: 1;
-  transform: translateX(0);
-  transition: opacity 300ms, transform 300ms;
-}
-.wizard-step-exit {
-  opacity: 1;
-  transform: translateX(0);
-}
-.wizard-step-exit-active {
-  opacity: 0;
-  transform: translateX(-10px);
-  transition: opacity 300ms, transform 300ms;
+/* ── Reglas Globales de Impresión Oficial ────────────────────────── */
+@media print {
+  @page {
+    size: letter portrait;
+    margin: 12mm 12mm 15mm 12mm;
+  }
+
+  html, body, #root {
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+    color: #111827 !important;
+    font-size: 11pt !important;
+    position: static !important;
+  }
+
+  aside, header, nav, .print\:hidden, #sdr-session-expiry-modal {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .print-avoid-break, tr, .card-print, .report-section {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  table {
+    page-break-inside: auto;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tfoot {
+    display: table-footer-group;
+  }
 }
