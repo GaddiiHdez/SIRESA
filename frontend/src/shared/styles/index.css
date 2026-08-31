@@ -14,7 +14,7 @@
 
 /* Estilos de Base Institucional */
 html {
-  font-size: 85%; /* Reduce el tamaño general del texto y elementos rem en un 15% para una densidad compacta y elegante */
+  font-size: 90%; /* Escala tipográfica global al 90% (+5% de incremento para legibilidad y proporción balanceada) */
 }
 
 body {
@@ -25,6 +25,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
 
 
 

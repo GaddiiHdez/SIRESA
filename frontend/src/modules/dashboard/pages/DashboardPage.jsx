@@ -287,16 +287,15 @@ export default function DashboardPage() {
           className="p-4 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-left transition-all cursor-pointer flex items-center justify-between shadow-xs group"
         >
           <div>
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-700 block">Padrón de Productores</span>
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-700 block whitespace-nowrap">Padrón de Productores</span>
             <span className="text-2xl font-bold text-slate-900 mt-0.5 block">{stats?.resumen?.beneficiarios?.total || 0}</span>
-            <span className="text-[11px] text-[#5E1232] font-semibold mt-0.5 flex items-center gap-1 group-hover:underline">
-              Ver padrón <ArrowUpRight size={12} />
-            </span>
+            <span className="text-[11px] text-slate-500 font-medium mt-0.5 block">Productores registrados</span>
           </div>
           <div className="p-2.5 bg-slate-100 text-slate-700 rounded-lg">
             <User size={20} />
           </div>
         </button>
+
 
       </div>
 

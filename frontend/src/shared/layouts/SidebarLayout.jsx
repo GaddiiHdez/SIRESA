@@ -185,7 +185,7 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
       {/* BARRA LATERAL (SIDEBAR) */}
       <aside 
         className={`print:hidden bg-gradient-to-b from-[#5E1232] via-[#480c25] to-[#200210] text-white flex flex-col justify-between shrink-0 p-4 shadow-xl hidden md:flex relative overflow-hidden h-full transition-all duration-300 ease-in-out ${
-          isCollapsed ? 'w-20' : 'w-64'
+          isCollapsed ? 'w-20' : 'w-72'
         }`}
       >
         {/* Línea dorada superior decorativa */}
@@ -209,14 +209,14 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
                 {/* Tipografía de Marca Institucional */}
                 <div className="flex flex-col min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <span className="font-black text-sm tracking-wider text-white font-sans leading-none">
+                    <span className="font-bold text-sm tracking-wider text-white font-sans leading-none">
                       SIRESA
                     </span>
-                    <span className="text-[8px] font-black px-1.5 py-0.25 bg-[#C29A52]/25 text-amber-300 border border-[#C29A52]/40 rounded-md tracking-tight leading-none">
+                    <span className="text-[8px] font-bold px-1.5 py-0.25 bg-[#C29A52]/25 text-amber-300 border border-[#C29A52]/40 rounded-md tracking-tight leading-none">
                       v1.3.0
                     </span>
                   </div>
-                  <span className="text-[9px] text-amber-200/80 font-bold uppercase tracking-widest leading-none mt-1 truncate">
+                  <span className="text-[9px] text-amber-200/80 font-semibold uppercase tracking-widest leading-none mt-1 truncate">
                     Desarrollo Rural
                   </span>
                 </div>
@@ -257,116 +257,117 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
           )}
 
           {/* MENÚ DE NAVEGACIÓN */}
-          <nav className="space-y-2">
+          <nav className="space-y-1.5">
             {!isCollapsed ? (
               // Modo Extendido
               <>
                 <button
                   onClick={() => safeNavigate('/')}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-smooth border-l-4 ${
+                  className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs lg:text-sm font-semibold transition-smooth border-l-4 ${
                     currentPath === '/'
                       ? 'bg-gradient-to-r from-[#C29A52]/35 via-[#C29A52]/10 to-transparent text-white border-l-nayarit-gold shadow-sm'
                       : 'hover:bg-white/5 text-slate-300 hover:text-white border-l-transparent'
                   }`}
                 >
                   <LayoutDashboard className={`w-4.5 h-4.5 shrink-0 ${currentPath === '/' ? 'text-nayarit-gold' : 'text-slate-300'}`} />
-                  Mesa de Control
+                  <span className="whitespace-nowrap truncate">Mesa de Control</span>
                 </button>
                 <button
                   onClick={() => safeNavigate('/estadisticas')}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-smooth border-l-4 ${
+                  className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs lg:text-sm font-semibold transition-smooth border-l-4 ${
                     currentPath === '/estadisticas'
                       ? 'bg-gradient-to-r from-[#C29A52]/35 via-[#C29A52]/10 to-transparent text-white border-l-nayarit-gold shadow-sm'
                       : 'hover:bg-white/5 text-slate-300 hover:text-white border-l-transparent'
                   }`}
                 >
                   <PieChart className={`w-4.5 h-4.5 shrink-0 ${currentPath === '/estadisticas' ? 'text-nayarit-gold' : 'text-slate-300'}`} />
-                  Estadísticas y Análisis
+                  <span className="whitespace-nowrap truncate">Estadísticas y Análisis</span>
                 </button>
                 {currentUser?.role !== 'ANALISTA' && (
                   <button
                     onClick={() => safeNavigate('/registrar')}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-smooth border-l-4 ${
+                    className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs lg:text-sm font-semibold transition-smooth border-l-4 ${
                       currentPath === '/registrar'
                         ? 'bg-gradient-to-r from-[#C29A52]/35 via-[#C29A52]/10 to-transparent text-white border-l-nayarit-gold shadow-sm'
                         : 'hover:bg-white/5 text-slate-300 hover:text-white border-l-transparent'
                     }`}
                   >
                     <PlusCircle className={`w-4.5 h-4.5 shrink-0 ${currentPath === '/registrar' ? 'text-nayarit-gold' : 'text-slate-300'}`} />
-                    Nueva Solicitud
+                    <span className="whitespace-nowrap truncate">Nueva Solicitud</span>
                   </button>
                 )}
                 <button
                   onClick={() => safeNavigate('/consultar')}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-smooth border-l-4 ${
+                  className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs lg:text-sm font-semibold transition-smooth border-l-4 ${
                     currentPath === '/consultar'
                       ? 'bg-gradient-to-r from-[#C29A52]/35 via-[#C29A52]/10 to-transparent text-white border-l-nayarit-gold shadow-sm'
                       : 'hover:bg-white/5 text-slate-300 hover:text-white border-l-transparent'
                   }`}
                 >
                   <FileSpreadsheet className={`w-4.5 h-4.5 shrink-0 ${currentPath === '/consultar' ? 'text-nayarit-gold' : 'text-slate-300'}`} />
-                  Buscar Expedientes
+                  <span className="whitespace-nowrap truncate">Buscar Expedientes</span>
                 </button>
                 <button
                   onClick={() => safeNavigate('/productores')}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-smooth border-l-4 ${
+                  className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs lg:text-sm font-semibold transition-smooth border-l-4 ${
                     currentPath === '/productores'
                       ? 'bg-gradient-to-r from-[#C29A52]/35 via-[#C29A52]/10 to-transparent text-white border-l-nayarit-gold shadow-sm'
                       : 'hover:bg-white/5 text-slate-300 hover:text-white border-l-transparent'
                   }`}
                 >
                   <Users className={`w-4.5 h-4.5 shrink-0 ${currentPath === '/productores' ? 'text-nayarit-gold' : 'text-slate-300'}`} />
-                  Padrón de Productores
+                  <span className="whitespace-nowrap truncate">Padrón de Productores</span>
                 </button>
                 <button
                   onClick={() => safeNavigate('/directorio')}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-smooth border-l-4 ${
+                  className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs lg:text-sm font-semibold transition-smooth border-l-4 ${
                     currentPath === '/directorio'
                       ? 'bg-gradient-to-r from-[#C29A52]/35 via-[#C29A52]/10 to-transparent text-white border-l-nayarit-gold shadow-sm'
                       : 'hover:bg-white/5 text-slate-300 hover:text-white border-l-transparent'
                   }`}
                 >
                   <Compass className={`w-4.5 h-4.5 shrink-0 ${currentPath === '/directorio' ? 'text-nayarit-gold' : 'text-slate-300'}`} />
-                  Geodirectorio Rural
+                  <span className="whitespace-nowrap truncate">Geodirectorio Rural</span>
                 </button>
                 <button
                   onClick={() => safeNavigate('/reportes')}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-smooth border-l-4 ${
+                  className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs lg:text-sm font-semibold transition-smooth border-l-4 ${
                     currentPath === '/reportes'
                       ? 'bg-gradient-to-r from-[#C29A52]/35 via-[#C29A52]/10 to-transparent text-white border-l-nayarit-gold shadow-sm'
                       : 'hover:bg-white/5 text-slate-300 hover:text-white border-l-transparent'
                   }`}
                 >
                   <Landmark className={`w-4.5 h-4.5 shrink-0 ${currentPath === '/reportes' ? 'text-nayarit-gold' : 'text-slate-300'}`} />
-                  Reportes Ejecutivos
+                  <span className="whitespace-nowrap truncate">Reportes Ejecutivos</span>
                 </button>
                 {(currentUser?.role === 'SUPERADMIN' || currentUser?.role === 'ADMINISTRADOR') && (
                   <button
                     onClick={() => safeNavigate('/usuarios')}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-smooth border-l-4 ${
+                    className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs lg:text-sm font-semibold transition-smooth border-l-4 ${
                       currentPath === '/usuarios'
                         ? 'bg-gradient-to-r from-[#C29A52]/35 via-[#C29A52]/10 to-transparent text-white border-l-nayarit-gold shadow-sm'
                         : 'hover:bg-white/5 text-slate-300 hover:text-white border-l-transparent'
                     }`}
                   >
                     <ShieldCheck className={`w-4.5 h-4.5 shrink-0 ${currentPath === '/usuarios' ? 'text-nayarit-gold' : 'text-slate-300'}`} />
-                    Gestión de Usuarios
+                    <span className="whitespace-nowrap truncate">Gestión de Usuarios</span>
                   </button>
                 )}
                 {currentUser?.role === 'SUPERADMIN' && (
                   <button
                     onClick={() => safeNavigate('/bitacora')}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-smooth border-l-4 ${
+                    className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs lg:text-sm font-semibold transition-smooth border-l-4 ${
                       currentPath === '/bitacora'
                         ? 'bg-gradient-to-r from-[#C29A52]/35 via-[#C29A52]/10 to-transparent text-white border-l-nayarit-gold shadow-sm'
                         : 'hover:bg-white/5 text-slate-300 hover:text-white border-l-transparent'
                     }`}
                   >
                     <ShieldAlert className={`w-4.5 h-4.5 shrink-0 ${currentPath === '/bitacora' ? 'text-amber-400' : 'text-slate-300'}`} />
-                    Bitácora de Auditoría
+                    <span className="whitespace-nowrap truncate">Bitácora de Auditoría</span>
                   </button>
                 )}
               </>
+
             ) : (
               // Modo Contraído (Solo Iconos con Tooltips nativos)
               <div className="flex flex-col items-center gap-2 animate-fadeIn">
