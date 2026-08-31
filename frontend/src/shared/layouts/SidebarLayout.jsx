@@ -10,6 +10,7 @@ import { apiGetSolicitud, apiActualizarEstatus } from '../services/api';
 import { toast } from '../utils/toast';
 import { useSessionExpiry } from '../hooks/useSessionExpiry';
 import SessionExpiryModal from '../components/SessionExpiryModal';
+import ConfirmarSalidaModal from '../components/ConfirmarSalidaModal';
 
 export default function SidebarLayout({ currentUser, onLogout, children }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -23,6 +24,10 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
   const [estatusComentario, setEstatusComentario] = useState('');
   const [updateLoading, setUpdateLoading] = useState(false);
 
+  // ── Manejo de Confirmación al Abandonar Solicitud en Curso ─────────────────
+  const [showConfirmExitModal, setShowConfirmExitModal] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState(null);
+
   // ── Manejo de expiración de sesión ────────────────────────────────────────
   // El hook monitorea el token JWT y activa el modal cuando está por expirar o ya expiró
   const { sessionState, minutesLeft, dismissWarning } = useSessionExpiry(onLogout);
@@ -32,6 +37,68 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
   const handleSessionRenewed = (newUser) => {
     toast.success(`✅ Sesión renovada. Bienvenido de nuevo, ${newUser.name?.split(' ')[0] || newUser.username}.`, 5000);
     dismissWarning();
+  };
+
+  const [captureState, setCaptureState] = useState({
+    active: false,
+    moduloTipo: '',
+    label: 'SDR NAYARIT',
+    title: 'SISTEMA DE GESTIÓN',
+    iconKey: 'DASHBOARD',
+    actions: []
+  });
+
+  // Navegación Segura: Bloquea y pide confirmación si hay captura activa
+  const safeNavigate = (targetPath) => {
+    if (targetPath === currentPath) return;
+    if (captureState.active && currentPath === '/registrar') {
+      setPendingNavigation(targetPath);
+      setShowConfirmExitModal(true);
+    } else {
+      navigate(targetPath);
+    }
+  };
+
+  // Cerrar Sesión Segura: Advierte si hay captura activa
+  const handleSafeLogout = () => {
+    if (captureState.active && currentPath === '/registrar') {
+      setPendingNavigation('LOGOUT');
+      setShowConfirmExitModal(true);
+    } else {
+      onLogout();
+    }
+  };
+
+  const handleConfirmSaveAndExit = () => {
+    window.dispatchEvent(new CustomEvent('sdr-solicitud-guardar-borrador'));
+    setShowConfirmExitModal(false);
+    toast.success('Borrador guardado. Podrás retomarlo cuando regreses a Nueva Solicitud.', 4000);
+    if (pendingNavigation === 'LOGOUT') {
+      onLogout();
+    } else if (pendingNavigation) {
+      navigate(pendingNavigation);
+    }
+    setPendingNavigation(null);
+  };
+
+  const handleConfirmStay = () => {
+    setShowConfirmExitModal(false);
+    setPendingNavigation(null);
+  };
+
+  const handleConfirmDiscardAndExit = () => {
+    window.dispatchEvent(new CustomEvent('sdr-solicitud-descartar-borrador'));
+    try {
+      localStorage.removeItem('siresa_solicitud_draft');
+    } catch (e) {}
+    setShowConfirmExitModal(false);
+    toast.info('Borrador descartado.');
+    if (pendingNavigation === 'LOGOUT') {
+      onLogout();
+    } else if (pendingNavigation) {
+      navigate(pendingNavigation);
+    }
+    setPendingNavigation(null);
   };
 
   useEffect(() => {
@@ -74,15 +141,6 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
     }
   };
 
-  const [captureState, setCaptureState] = useState({
-    active: false,
-    moduloTipo: '',
-    label: 'SDR NAYARIT',
-    title: 'SISTEMA DE GESTIÓN',
-    iconKey: 'DASHBOARD',
-    actions: []
-  });
-
   useEffect(() => {
     const handleNavbarUpdate = (e) => {
       setCaptureState(prev => ({
@@ -105,11 +163,7 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
   return (
     <div className="h-screen w-screen flex bg-nayarit-light text-slate-700 overflow-hidden print:h-auto print:w-full print:overflow-visible print:block print:bg-white">
 
-      {/* ── Modal de Expiración / Aviso de Sesión ────────────────────────────
-          Se muestra automáticamente cuando:
-          - sessionState='warning': la sesión expira en menos de 10 minutos
-          - sessionState='expired': el token ya expiró
-          En modo 'active' no renderiza nada. */}
+      {/* ── Modal de Expiración / Aviso de Sesión ──────────────────────────── */}
       <SessionExpiryModal
         sessionState={sessionState}
         minutesLeft={minutesLeft}
@@ -117,6 +171,15 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
         onRenewed={handleSessionRenewed}
         onLogout={onLogout}
         onDismiss={sessionState === 'warning' ? dismissWarning : undefined}
+      />
+
+      {/* ── Modal de Advertencia al Abandonar Solicitud en Curso ───────────── */}
+      <ConfirmarSalidaModal
+        isOpen={showConfirmExitModal}
+        moduloTitulo={captureState.title}
+        onSaveAndExit={handleConfirmSaveAndExit}
+        onStay={handleConfirmStay}
+        onDiscardAndExit={handleConfirmDiscardAndExit}
       />
 
       {/* BARRA LATERAL (SIDEBAR) */}
@@ -150,7 +213,7 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
                       SIRESA
                     </span>
                     <span className="text-[8px] font-black px-1.5 py-0.25 bg-[#C29A52]/25 text-amber-300 border border-[#C29A52]/40 rounded-md tracking-tight leading-none">
-                      v1.2.1
+                      v1.3.0
                     </span>
                   </div>
                   <span className="text-[9px] text-amber-200/80 font-bold uppercase tracking-widest leading-none mt-1 truncate">
@@ -199,7 +262,7 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
               // Modo Extendido
               <>
                 <button
-                  onClick={() => navigate('/')}
+                  onClick={() => safeNavigate('/')}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-smooth border-l-4 ${
                     currentPath === '/'
                       ? 'bg-gradient-to-r from-[#C29A52]/35 via-[#C29A52]/10 to-transparent text-white border-l-nayarit-gold shadow-sm'
@@ -210,7 +273,7 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
                   Mesa de Control
                 </button>
                 <button
-                  onClick={() => navigate('/estadisticas')}
+                  onClick={() => safeNavigate('/estadisticas')}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-smooth border-l-4 ${
                     currentPath === '/estadisticas'
                       ? 'bg-gradient-to-r from-[#C29A52]/35 via-[#C29A52]/10 to-transparent text-white border-l-nayarit-gold shadow-sm'
@@ -222,7 +285,7 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
                 </button>
                 {currentUser?.role !== 'ANALISTA' && (
                   <button
-                    onClick={() => navigate('/registrar')}
+                    onClick={() => safeNavigate('/registrar')}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-smooth border-l-4 ${
                       currentPath === '/registrar'
                         ? 'bg-gradient-to-r from-[#C29A52]/35 via-[#C29A52]/10 to-transparent text-white border-l-nayarit-gold shadow-sm'
@@ -234,7 +297,7 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
                   </button>
                 )}
                 <button
-                  onClick={() => navigate('/consultar')}
+                  onClick={() => safeNavigate('/consultar')}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-smooth border-l-4 ${
                     currentPath === '/consultar'
                       ? 'bg-gradient-to-r from-[#C29A52]/35 via-[#C29A52]/10 to-transparent text-white border-l-nayarit-gold shadow-sm'
@@ -245,7 +308,7 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
                   Buscar Expedientes
                 </button>
                 <button
-                  onClick={() => navigate('/productores')}
+                  onClick={() => safeNavigate('/productores')}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-smooth border-l-4 ${
                     currentPath === '/productores'
                       ? 'bg-gradient-to-r from-[#C29A52]/35 via-[#C29A52]/10 to-transparent text-white border-l-nayarit-gold shadow-sm'
@@ -256,7 +319,7 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
                   Padrón de Productores
                 </button>
                 <button
-                  onClick={() => navigate('/directorio')}
+                  onClick={() => safeNavigate('/directorio')}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-smooth border-l-4 ${
                     currentPath === '/directorio'
                       ? 'bg-gradient-to-r from-[#C29A52]/35 via-[#C29A52]/10 to-transparent text-white border-l-nayarit-gold shadow-sm'
@@ -267,7 +330,7 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
                   Geodirectorio Rural
                 </button>
                 <button
-                  onClick={() => navigate('/reportes')}
+                  onClick={() => safeNavigate('/reportes')}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-smooth border-l-4 ${
                     currentPath === '/reportes'
                       ? 'bg-gradient-to-r from-[#C29A52]/35 via-[#C29A52]/10 to-transparent text-white border-l-nayarit-gold shadow-sm'
@@ -279,7 +342,7 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
                 </button>
                 {(currentUser?.role === 'SUPERADMIN' || currentUser?.role === 'ADMINISTRADOR') && (
                   <button
-                    onClick={() => navigate('/usuarios')}
+                    onClick={() => safeNavigate('/usuarios')}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-smooth border-l-4 ${
                       currentPath === '/usuarios'
                         ? 'bg-gradient-to-r from-[#C29A52]/35 via-[#C29A52]/10 to-transparent text-white border-l-nayarit-gold shadow-sm'
@@ -292,7 +355,7 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
                 )}
                 {currentUser?.role === 'SUPERADMIN' && (
                   <button
-                    onClick={() => navigate('/bitacora')}
+                    onClick={() => safeNavigate('/bitacora')}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-smooth border-l-4 ${
                       currentPath === '/bitacora'
                         ? 'bg-gradient-to-r from-[#C29A52]/35 via-[#C29A52]/10 to-transparent text-white border-l-nayarit-gold shadow-sm'
@@ -308,7 +371,7 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
               // Modo Contraído (Solo Iconos con Tooltips nativos)
               <div className="flex flex-col items-center gap-2 animate-fadeIn">
                 <button
-                  onClick={() => navigate('/')}
+                  onClick={() => safeNavigate('/')}
                   title="Mesa de Control"
                   className={`w-12 h-12 flex items-center justify-center rounded-xl transition-smooth border-l-4 ${
                     currentPath === '/'
@@ -319,7 +382,7 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
                   <LayoutDashboard className={`w-5 h-5 ${currentPath === '/' ? 'text-nayarit-gold' : 'text-slate-300'}`} />
                 </button>
                 <button
-                  onClick={() => navigate('/estadisticas')}
+                  onClick={() => safeNavigate('/estadisticas')}
                   title="Estadísticas y Análisis"
                   className={`w-12 h-12 flex items-center justify-center rounded-xl transition-smooth border-l-4 ${
                     currentPath === '/estadisticas'
@@ -331,7 +394,7 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
                 </button>
                 {currentUser?.role !== 'ANALISTA' && (
                   <button
-                    onClick={() => navigate('/registrar')}
+                    onClick={() => safeNavigate('/registrar')}
                     title="Nueva Solicitud"
                     className={`w-12 h-12 flex items-center justify-center rounded-xl transition-smooth border-l-4 ${
                       currentPath === '/registrar'
@@ -343,7 +406,7 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
                   </button>
                 )}
                  <button
-                  onClick={() => navigate('/consultar')}
+                  onClick={() => safeNavigate('/consultar')}
                   title="Buscar Expedientes"
                   className={`w-12 h-12 flex items-center justify-center rounded-xl transition-smooth border-l-4 ${
                     currentPath === '/consultar'
@@ -354,7 +417,7 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
                   <FileSpreadsheet className={`w-5 h-5 ${currentPath === '/consultar' ? 'text-nayarit-gold' : 'text-slate-300'}`} />
                 </button>
                 <button
-                  onClick={() => navigate('/productores')}
+                  onClick={() => safeNavigate('/productores')}
                   title="Padrón de Productores"
                   className={`w-12 h-12 flex items-center justify-center rounded-xl transition-smooth border-l-4 ${
                     currentPath === '/productores'
@@ -365,7 +428,7 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
                   <Users className={`w-5 h-5 ${currentPath === '/productores' ? 'text-nayarit-gold' : 'text-slate-300'}`} />
                 </button>
                 <button
-                  onClick={() => navigate('/directorio')}
+                  onClick={() => safeNavigate('/directorio')}
                   title="Geodirectorio Rural"
                   className={`w-12 h-12 flex items-center justify-center rounded-xl transition-smooth border-l-4 ${
                     currentPath === '/directorio'
@@ -376,7 +439,7 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
                   <Compass className={`w-5 h-5 ${currentPath === '/directorio' ? 'text-nayarit-gold' : 'text-slate-300'}`} />
                 </button>
                 <button
-                  onClick={() => navigate('/reportes')}
+                  onClick={() => safeNavigate('/reportes')}
                   title="Reportes Ejecutivos"
                   className={`w-12 h-12 flex items-center justify-center rounded-xl transition-smooth border-l-4 ${
                     currentPath === '/reportes'
@@ -388,7 +451,7 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
                 </button>
                 {(currentUser?.role === 'SUPERADMIN' || currentUser?.role === 'ADMINISTRADOR') && (
                   <button
-                    onClick={() => navigate('/usuarios')}
+                    onClick={() => safeNavigate('/usuarios')}
                     title="Gestión de Usuarios"
                     className={`w-12 h-12 flex items-center justify-center rounded-xl transition-smooth border-l-4 ${
                       currentPath === '/usuarios'
@@ -401,7 +464,7 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
                 )}
                 {currentUser?.role === 'SUPERADMIN' && (
                   <button
-                    onClick={() => navigate('/bitacora')}
+                    onClick={() => safeNavigate('/bitacora')}
                     title="Bitácora de Auditoría Forense"
                     className={`w-12 h-12 flex items-center justify-center rounded-xl transition-smooth border-l-4 ${
                       currentPath === '/bitacora'
@@ -435,8 +498,8 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
               </div>
 
               <button
-                onClick={onLogout}
-                className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-bold text-red-300 hover:bg-red-950/20 hover:text-red-200 transition-smooth border border-red-500/10"
+                onClick={handleSafeLogout}
+                className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-bold text-red-300 hover:bg-red-950/20 hover:text-red-200 transition-smooth border border-red-500/10 cursor-pointer"
               >
                 <LogOut className="w-4 h-4 shrink-0" />
                 Cerrar Sesión
@@ -452,9 +515,9 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
                 <User className="w-5 h-5" />
               </div>
               <button
-                onClick={onLogout}
+                onClick={handleSafeLogout}
                 title="Cerrar Sesión"
-                className="w-12 h-12 flex items-center justify-center rounded-xl text-red-300 hover:bg-red-950/20 hover:text-red-200 transition-smooth border border-red-500/10"
+                className="w-12 h-12 flex items-center justify-center rounded-xl text-red-300 hover:bg-red-950/20 hover:text-red-200 transition-smooth border border-red-500/10 cursor-pointer"
               >
                 <LogOut className="w-4.5 h-4.5" />
               </button>
@@ -483,8 +546,8 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
                   key={act.id}
                   type="button"
                   onClick={() => {
-                    if (act.id === 'navigate-registrar') navigate('/registrar');
-                    else if (act.id === 'navigate-consultar') navigate('/consultar');
+                    if (act.id === 'navigate-registrar') safeNavigate('/registrar');
+                    else if (act.id === 'navigate-consultar') safeNavigate('/consultar');
                     else window.dispatchEvent(new CustomEvent(`sdr-navbar-action-${act.id}`));
                   }}
                   className={`px-2.5 py-1 text-[10px] font-bold rounded-lg ${
@@ -497,8 +560,8 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
             </div>
           ) : (
             <button
-              onClick={onLogout}
-              className="p-1.5 hover:bg-white/10 rounded-xl"
+              onClick={handleSafeLogout}
+              className="p-1.5 hover:bg-white/10 rounded-xl cursor-pointer"
               title="Cerrar Sesión"
             >
               <LogOut className="w-5 h-5 text-red-300" />
@@ -520,49 +583,24 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
                 {IconComponent && <IconComponent className="w-4 h-4 lg:w-5 lg:h-5" />}
               </div>
               <div className="min-w-0">
-                <span className="text-[9px] lg:text-[10px] font-extrabold text-nayarit-gold uppercase tracking-widest leading-none truncate block">
-                  {captureState.label}
-                </span>
-                <h2 className="text-xs lg:text-[14px] font-black text-slate-800 uppercase tracking-wide truncate mt-0.5 whitespace-nowrap block">
+                <h1 className="text-sm lg:text-base font-extrabold text-slate-900 tracking-tight leading-tight uppercase font-outfit truncate">
                   {captureState.title}
-                </h2>
+                </h1>
+                <p className="text-[10px] lg:text-[11px] text-slate-500 font-semibold tracking-normal truncate hidden sm:block">
+                  {captureState.subtitle}
+                </p>
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2 lg:gap-3 shrink-0">
-            {/* BUSCADOR INTERACTIVO EN NAVBAR */}
-            <BuscadorNavbar onSelectExpediente={handleOpenDetail} />
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            {/* Buscador Omnibox Global */}
+            <BuscadorNavbar onSelectSolicitud={(sol) => setSelectedSolicitud(sol)} />
 
-            {/* CENTRO DE NOTIFICACIONES */}
-            <CentroNotificacionesMenu onSelectExpediente={handleOpenDetail} />
+            {/* Centro de Notificaciones Inteligente */}
+            <CentroNotificacionesMenu onSelectSolicitud={(sol) => setSelectedSolicitud(sol)} />
 
+            {/* Acciones dinámicas de cada módulo */}
             {captureState.actions && captureState.actions.map(act => {
-              if (act.id === 'navigate-registrar') {
-                return (
-                  <button
-                    key={act.id}
-                    type="button"
-                    onClick={() => navigate('/registrar')}
-                    className="flex items-center gap-1.5 px-3.5 py-2 bg-nayarit-green text-white hover:bg-nayarit-lightGreen rounded-xl text-[11px] font-bold transition-smooth shadow-2xs cursor-pointer uppercase tracking-wider font-extrabold"
-                  >
-                    <PlusCircle className="w-3.5 h-3.5" />
-                    {act.text}
-                  </button>
-                );
-              }
-              if (act.id === 'navigate-consultar') {
-                return (
-                  <button
-                    key={act.id}
-                    type="button"
-                    onClick={() => navigate('/consultar')}
-                    className="flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-xl text-[11px] font-bold transition-smooth shadow-2xs cursor-pointer uppercase tracking-wider font-extrabold"
-                  >
-                    <FileSpreadsheet className="w-3.5 h-3.5 text-nayarit-gold" />
-                    {act.text}
-                  </button>
-                );
-              }
               if (act.id === 'rellenar') {
                 return (
                   <button
@@ -608,7 +646,7 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
         {/* NAVEGACIÓN MÓVIL TAB BAR */}
         <nav className="print:hidden md:hidden bg-white border-t border-slate-200 flex justify-around py-2 shrink-0 z-20 shadow-lg">
           <button
-            onClick={() => navigate('/')}
+            onClick={() => safeNavigate('/')}
             className={`flex flex-col items-center gap-1 text-[10px] font-semibold ${currentPath === '/' ? 'text-nayarit-gold' : 'text-slate-400'}`}
           >
             <BarChart3 className="w-5 h-5" />
@@ -616,22 +654,22 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
           </button>
           {currentUser?.role !== 'ANALISTA' && (
             <button
-              onClick={() => navigate('/registrar')}
+              onClick={() => safeNavigate('/registrar')}
               className={`flex flex-col items-center gap-1 text-[10px] font-semibold ${currentPath === '/registrar' ? 'text-nayarit-gold' : 'text-slate-400'}`}
             >
               <PlusCircle className="w-5 h-5" />
-              Nueva Solicitud
+              Nueva
             </button>
           )}
           <button
-            onClick={() => navigate('/consultar')}
+            onClick={() => safeNavigate('/consultar')}
             className={`flex flex-col items-center gap-1 text-[10px] font-semibold ${currentPath === '/consultar' ? 'text-nayarit-gold' : 'text-slate-400'}`}
           >
             <FileSpreadsheet className="w-5 h-5" />
             Expedientes
           </button>
           <button
-            onClick={() => navigate('/productores')}
+            onClick={() => safeNavigate('/productores')}
             className={`flex flex-col items-center gap-1 text-[10px] font-semibold ${currentPath === '/productores' ? 'text-nayarit-gold' : 'text-slate-400'}`}
           >
             <Users className="w-5 h-5" />
