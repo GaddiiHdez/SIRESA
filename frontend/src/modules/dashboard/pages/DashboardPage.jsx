@@ -192,170 +192,162 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6 animate-fadeIn pb-12">
       
-      {/* ── 1. HERO OPERATIVO Y BIENVENIDA ────────────────────────────────────────── */}
-      <div className="bg-[#480C25] bg-gradient-to-br from-[#480C25] via-[#380A1D] to-[#0F172A] text-white rounded-3xl p-6 md:p-8 shadow-2xl border border-white/10 relative overflow-hidden">
-        
-        <div className="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-          
-          {/* Saludo y Resumen con Tipografía Nítida de Alto Contraste */}
-          <div className="space-y-2.5 max-w-2xl">
-            <div className="flex items-center gap-2 text-xs font-extrabold text-[#C29A52] uppercase tracking-widest">
-              <Sparkles size={14} className="text-[#C29A52]" />
-              <span>{getFechaFormateada()}</span>
+      {/* ── 1. ENCABEZADO INSTITUCIONAL DE CONTROL OPERATIVO ──────────────────────── */}
+      <div className="bg-[#5E1232] text-white rounded-xl p-5 md:p-6 shadow-sm border border-[#5E1232] relative">
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+          <div className="space-y-1 max-w-2xl">
+            <div className="text-[11px] font-bold text-[#DAB777] uppercase tracking-wider">
+              {getFechaFormateada()}
             </div>
-
-            <h1 className="text-2xl md:text-3xl font-black text-white leading-tight tracking-tight drop-shadow-sm">
-              {getSaludo()}, {currentUser?.name?.split(' ')[0] || 'Administrador'} 👋
+            <h1 className="text-xl md:text-2xl font-bold text-white tracking-tight">
+              Mesa de Control y Dictaminación
             </h1>
-
-            <p className="text-xs md:text-sm text-slate-200 font-medium leading-relaxed">
-              Actualmente tienes <strong className="text-[#FBBF24] font-extrabold">{pendientes.length} expediente(s) pendientes de atención</strong> en el flujo de validación y dictamen de la Secretaría.
+            <p className="text-xs md:text-sm text-slate-200 font-medium">
+              Hay <strong className="text-amber-300 font-bold">{pendientes.length} expediente(s) pendientes de atención</strong> en el flujo de revisión y dictamen de la Secretaría.
             </p>
           </div>
 
-          {/* Acceso Rápido: Botón Nueva Solicitud */}
           {currentUser?.role !== 'ANALISTA' && (
             <div className="w-full sm:w-auto shrink-0">
               <button
                 onClick={() => navigate('/registrar')}
-                className="w-full sm:w-auto py-3.5 px-6 bg-[#C29A52] hover:bg-[#b08b47] text-slate-950 rounded-2xl font-black text-xs flex items-center justify-center gap-2.5 transition-all shadow-xl hover:shadow-2xl hover:scale-[1.03] cursor-pointer"
+                className="w-full sm:w-auto py-2.5 px-5 bg-[#C29A52] hover:bg-[#b08b47] text-[#200210] rounded-lg font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-xs cursor-pointer"
               >
-                <PlusCircle size={18} className="text-slate-950 stroke-[2.5]" />
-                <span className="text-xs uppercase tracking-wider font-extrabold">Nueva Solicitud</span>
+                <PlusCircle size={16} />
+                <span>Nueva Solicitud</span>
               </button>
             </div>
           )}
-
         </div>
       </div>
 
       {/* ── 2. TARJETAS DE ESTADO OPERATIVO (FILTROS RÁPIDOS) ─────────────────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
         
         {/* PENDIENTES / POR DICTAMINAR */}
         <button
           onClick={() => setActiveTab('PENDIENTES')}
-          className={`p-5 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between shadow-xs ${
+          className={`p-4 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between shadow-xs ${
             activeTab === 'PENDIENTES'
-              ? 'bg-amber-50/80 border-amber-300 ring-2 ring-amber-400/20'
-              : 'bg-white border-slate-200/80 hover:bg-slate-50'
+              ? 'bg-amber-50 border-amber-300 ring-2 ring-amber-400/20'
+              : 'bg-white border-slate-200 hover:bg-slate-50'
           }`}
         >
           <div>
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-amber-700 block">Por Dictaminar</span>
-            <span className="text-2xl font-black text-slate-900 mt-1 block">{pendientes.length}</span>
-            <span className="text-[10px] text-slate-500 font-semibold mt-0.5 block">Nuevas y en revisión</span>
+            <span className="text-[11px] font-bold uppercase tracking-wider text-amber-800 block">Por Dictaminar</span>
+            <span className="text-2xl font-bold text-slate-900 mt-0.5 block">{pendientes.length}</span>
+            <span className="text-[11px] text-slate-500 font-medium mt-0.5 block">Pendientes de revisión</span>
           </div>
-          <div className="p-3 bg-amber-100 text-amber-700 rounded-xl">
-            <Inbox size={22} />
+          <div className="p-2.5 bg-amber-100 text-amber-800 rounded-lg">
+            <Inbox size={20} />
           </div>
         </button>
 
         {/* DICTAMINADAS Y APROBADAS */}
         <button
           onClick={() => setActiveTab('APROBADAS')}
-          className={`p-5 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between shadow-xs ${
+          className={`p-4 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between shadow-xs ${
             activeTab === 'APROBADAS'
-              ? 'bg-emerald-50/80 border-emerald-300 ring-2 ring-emerald-400/20'
-              : 'bg-white border-slate-200/80 hover:bg-slate-50'
+              ? 'bg-emerald-50 border-emerald-300 ring-2 ring-emerald-400/20'
+              : 'bg-white border-slate-200 hover:bg-slate-50'
           }`}
         >
           <div>
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-700 block">Listas para Pago</span>
-            <span className="text-2xl font-black text-slate-900 mt-1 block">{aprobadas.length}</span>
-            <span className="text-[10px] text-slate-500 font-semibold mt-0.5 block">Dictaminadas y aprobadas</span>
+            <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-800 block">Listas para Pago</span>
+            <span className="text-2xl font-bold text-slate-900 mt-0.5 block">{aprobadas.length}</span>
+            <span className="text-[11px] text-slate-500 font-medium mt-0.5 block">Dictaminadas y aprobadas</span>
           </div>
-          <div className="p-3 bg-emerald-100 text-emerald-700 rounded-xl">
-            <CheckCircle2 size={22} />
+          <div className="p-2.5 bg-emerald-100 text-emerald-800 rounded-lg">
+            <CheckCircle2 size={20} />
           </div>
         </button>
 
         {/* TOTAL DE EXPEDIENTES */}
         <button
           onClick={() => setActiveTab('TODAS')}
-          className={`p-5 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between shadow-xs ${
+          className={`p-4 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between shadow-xs ${
             activeTab === 'TODAS'
-              ? 'bg-blue-50/80 border-blue-300 ring-2 ring-blue-400/20'
-              : 'bg-white border-slate-200/80 hover:bg-slate-50'
+              ? 'bg-blue-50 border-blue-300 ring-2 ring-blue-400/20'
+              : 'bg-white border-slate-200 hover:bg-slate-50'
           }`}
         >
           <div>
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-blue-700 block">Total en Trámite</span>
-            <span className="text-2xl font-black text-slate-900 mt-1 block">{solicitudes.length}</span>
-            <span className="text-[10px] text-slate-500 font-semibold mt-0.5 block">Expedientes registrados</span>
+            <span className="text-[11px] font-bold uppercase tracking-wider text-blue-800 block">Total en Trámite</span>
+            <span className="text-2xl font-bold text-slate-900 mt-0.5 block">{solicitudes.length}</span>
+            <span className="text-[11px] text-slate-500 font-medium mt-0.5 block">Expedientes activos</span>
           </div>
-          <div className="p-3 bg-blue-100 text-blue-700 rounded-xl">
-            <FileText size={22} />
+          <div className="p-2.5 bg-blue-100 text-blue-800 rounded-lg">
+            <FileText size={20} />
           </div>
         </button>
 
         {/* PADRÓN DE PRODUCTORES */}
         <button
           onClick={() => navigate('/productores')}
-          className="p-5 rounded-2xl bg-white border border-slate-200/80 hover:bg-slate-50 text-left transition-all cursor-pointer flex items-center justify-between shadow-xs group"
+          className="p-4 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-left transition-all cursor-pointer flex items-center justify-between shadow-xs group"
         >
           <div>
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-purple-700 block">Padrón de Productores</span>
-            <span className="text-2xl font-black text-slate-900 mt-1 block">{stats?.resumen?.beneficiarios?.total || 0}</span>
-            <span className="text-[10px] text-purple-600 font-bold mt-0.5 flex items-center gap-1 group-hover:underline">
-              Ir al padrón <ArrowUpRight size={12} />
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-700 block">Padrón de Productores</span>
+            <span className="text-2xl font-bold text-slate-900 mt-0.5 block">{stats?.resumen?.beneficiarios?.total || 0}</span>
+            <span className="text-[11px] text-[#5E1232] font-semibold mt-0.5 flex items-center gap-1 group-hover:underline">
+              Ver padrón <ArrowUpRight size={12} />
             </span>
           </div>
-          <div className="p-3 bg-purple-100 text-purple-700 rounded-xl">
-            <User size={22} />
+          <div className="p-2.5 bg-slate-100 text-slate-700 rounded-lg">
+            <User size={20} />
           </div>
         </button>
 
       </div>
 
       {/* ── 3. BANDEJA DE TAREAS Y EXPEDIENTES (TABLA OPERATIVA) ──────────────── */}
-      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
         
         {/* HEADER DE LA BANDEJA CON PESTAÑAS */}
-        <div className="p-5 border-b border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="p-4 md:p-5 border-b border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-nayarit-burgundy/10 text-nayarit-burgundy rounded-xl">
-              <Inbox size={20} />
+            <div className="p-2 bg-slate-100 text-[#5E1232] rounded-lg">
+              <Inbox size={18} />
             </div>
             <div>
-              <h2 className="text-base font-extrabold text-slate-900 leading-none">
-                Bandeja de Tareas y Expedientes
+              <h2 className="text-base font-bold text-slate-900 leading-tight">
+                Expedientes y Solicitudes
               </h2>
-              <span className="text-xs text-slate-400 font-semibold mt-1 block">
-                {filteredList.length} expediente(s) mostrados en esta vista
+              <span className="text-xs text-slate-500 font-medium">
+                {filteredList.length} expediente(s) en esta vista
               </span>
             </div>
           </div>
 
           {/* PESTAÑAS OPERATIVAS */}
-          <div className="flex bg-slate-100 p-1 rounded-xl gap-1 w-full sm:w-auto">
+          <div className="flex bg-slate-100 p-1 rounded-lg gap-1 w-full sm:w-auto">
             <button
               onClick={() => setActiveTab('PENDIENTES')}
-              className={`flex-1 sm:flex-initial px-4 py-2 rounded-lg font-extrabold text-xs transition-all cursor-pointer ${
+              className={`flex-1 sm:flex-initial px-3.5 py-1.5 rounded font-bold text-xs transition-all cursor-pointer ${
                 activeTab === 'PENDIENTES'
                   ? 'bg-white text-slate-900 shadow-xs'
-                  : 'text-slate-500 hover:text-slate-800'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Por Atender ({pendientes.length})
+              Por Dictaminar ({pendientes.length})
             </button>
             <button
               onClick={() => setActiveTab('APROBADAS')}
-              className={`flex-1 sm:flex-initial px-4 py-2 rounded-lg font-extrabold text-xs transition-all cursor-pointer ${
+              className={`flex-1 sm:flex-initial px-3.5 py-1.5 rounded font-bold text-xs transition-all cursor-pointer ${
                 activeTab === 'APROBADAS'
                   ? 'bg-white text-slate-900 shadow-xs'
-                  : 'text-slate-500 hover:text-slate-800'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Listas para Pago ({aprobadas.length})
+              Aprobadas ({aprobadas.length})
             </button>
             <button
               onClick={() => setActiveTab('TODAS')}
-              className={`flex-1 sm:flex-initial px-4 py-2 rounded-lg font-extrabold text-xs transition-all cursor-pointer ${
+              className={`flex-1 sm:flex-initial px-3.5 py-1.5 rounded font-bold text-xs transition-all cursor-pointer ${
                 activeTab === 'TODAS'
                   ? 'bg-white text-slate-900 shadow-xs'
-                  : 'text-slate-500 hover:text-slate-800'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               Todas ({solicitudes.length})
@@ -366,12 +358,12 @@ export default function DashboardPage() {
 
         {/* LISTADO / TABLA DE EXPEDIENTES */}
         {filteredList.length === 0 ? (
-          <div className="text-center py-16 space-y-3 bg-slate-50/50">
-            <CheckCircle className="w-12 h-12 text-emerald-500 mx-auto opacity-70" />
+          <div className="text-center py-16 space-y-3 bg-slate-50">
+            <CheckCircle className="w-10 h-10 text-emerald-600 mx-auto" />
             <div className="space-y-1">
-              <h3 className="text-sm font-extrabold text-slate-800">¡Bandeja al día!</h3>
+              <h3 className="text-sm font-bold text-slate-800">Bandeja sin pendientes</h3>
               <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                No hay expedientes pendientes en este momento con los filtros seleccionados.
+                No hay expedientes pendientes con los filtros seleccionados.
               </p>
             </div>
           </div>
@@ -379,16 +371,16 @@ export default function DashboardPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="border-b border-slate-100 bg-slate-50/70 text-slate-400 font-extrabold uppercase tracking-wider text-[10px]">
-                  <th className="py-3.5 px-6">Folio y Sector</th>
-                  <th className="py-3.5 px-6">Productor / Titular</th>
-                  <th className="py-3.5 px-6">Ubicación</th>
-                  <th className="py-3.5 px-6">Apoyo Solicitado</th>
-                  <th className="py-3.5 px-6 text-center">Estatus</th>
-                  <th className="py-3.5 px-6 text-center">Acción Inmediata</th>
+                <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 font-bold uppercase tracking-wider text-[10px]">
+                  <th className="py-3 px-5">Folio / Sector</th>
+                  <th className="py-3 px-5">Productor Titular</th>
+                  <th className="py-3 px-5">Ubicación</th>
+                  <th className="py-3 px-5">Monto Solicitado</th>
+                  <th className="py-3 px-5 text-center">Estatus</th>
+                  <th className="py-3 px-5 text-center">Acción</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+              <tbody className="divide-y divide-slate-200 font-medium text-slate-700">
                 {filteredList.map((sol) => {
                   const SectorIcon = getSectorIcon(sol.moduloTipo);
                   const prodNombre = sol.productor?.nombreCompleto || 
@@ -396,19 +388,19 @@ export default function DashboardPage() {
                     sol.productor?.nombreOrganizacion || 'Productor Registrado';
 
                   return (
-                    <tr key={sol.id} className="hover:bg-slate-50/70 transition-all">
+                    <tr key={sol.id} className="hover:bg-slate-50 transition-colors">
                       
                       {/* FOLIO Y SECTOR */}
-                      <td className="py-4 px-6">
+                      <td className="py-3.5 px-5">
                         <div className="flex items-center gap-2.5">
-                          <div className="p-2 bg-slate-100 text-nayarit-gold rounded-xl shrink-0">
-                            <SectorIcon size={16} />
+                          <div className="p-1.5 bg-slate-100 text-[#5E1232] rounded-lg shrink-0">
+                            <SectorIcon size={15} />
                           </div>
                           <div>
-                            <span className="font-mono font-extrabold text-slate-900 text-xs block">
+                            <span className="font-mono font-bold text-slate-900 text-xs block">
                               {sol.folio}
                             </span>
-                            <span className="text-[10px] text-slate-400 font-bold block mt-0.5">
+                            <span className="text-[10px] text-slate-500 font-medium block">
                               {formatModulo(sol.moduloTipo)}
                             </span>
                           </div>
@@ -416,23 +408,23 @@ export default function DashboardPage() {
                       </td>
 
                       {/* PRODUCTOR */}
-                      <td className="py-4 px-6">
-                        <div className="font-bold text-slate-900 text-xs">{prodNombre}</div>
+                      <td className="py-3.5 px-5">
+                        <div className="font-semibold text-slate-900 text-xs">{prodNombre}</div>
                         {sol.productor?.curp && (
-                          <span className="font-mono text-[10px] text-slate-400 font-semibold block mt-0.5">
+                          <span className="font-mono text-[10px] text-slate-500 block">
                             {sol.productor.curp}
                           </span>
                         )}
                       </td>
 
                       {/* UBICACIÓN */}
-                      <td className="py-4 px-6">
-                        <div className="font-semibold text-slate-800">{sol.productor?.municipio || 'Nayarit'}</div>
-                        <div className="text-slate-400 text-[10px]">{sol.productor?.localidad || 'Localidad'}</div>
+                      <td className="py-3.5 px-5">
+                        <div className="font-medium text-slate-800">{sol.productor?.municipio || 'Nayarit'}</div>
+                        <div className="text-slate-500 text-[10px]">{sol.productor?.localidad || 'Localidad'}</div>
                       </td>
 
                       {/* APOYO SOLICITADO */}
-                      <td className="py-4 px-6">
+                      <td className="py-3.5 px-5">
                         <div className="font-bold text-slate-900">
                           {formatMoneda(sol.apoyoControl?.montoTotal || 0)}
                         </div>
@@ -442,20 +434,20 @@ export default function DashboardPage() {
                       </td>
 
                       {/* ESTATUS */}
-                      <td className="py-4 px-6 text-center">
-                        <span className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase border ${getStatusBadge(sol.status)}`}>
+                      <td className="py-3.5 px-5 text-center">
+                        <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${getStatusBadge(sol.status)}`}>
                           {sol.status}
                         </span>
                       </td>
 
-                      {/* ACCIÓN INMEDIATA: REVISAR TRÁMITE */}
-                      <td className="py-4 px-6 text-center">
+                      {/* ACCIÓN: REVISAR */}
+                      <td className="py-3.5 px-5 text-center">
                         <button
                           onClick={() => handleOpenExpediente(sol.id)}
-                          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer group"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer"
                         >
-                          <span>Revisar Trámite</span>
-                          <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+                          <span>Revisar</span>
+                          <ChevronRight size={13} />
                         </button>
                       </td>
 
@@ -467,23 +459,23 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* FOOTER CON BOTÓN DE NUEVA SOLICITUD */}
-        <div className="p-4 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <span className="text-xs text-slate-500 font-semibold">
-            Mostrando los expedientes más recientes del ciclo fiscal activo.
+        {/* FOOTER CON BOTÓN DE CONSULTA */}
+        <div className="p-3.5 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <span className="text-xs text-slate-500 font-medium">
+            Expedientes registrados en el ciclo fiscal activo.
           </span>
 
           <div className="flex gap-2">
             <button
               onClick={() => navigate('/consultar')}
-              className="px-4 py-2 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-all"
+              className="px-3.5 py-1.5 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 font-semibold text-xs rounded-lg transition-colors cursor-pointer"
             >
-              Ver Consulta Avanzada →
+              Consulta Avanzada →
             </button>
             {currentUser?.role !== 'ANALISTA' && (
               <button
                 onClick={() => navigate('/registrar')}
-                className="px-4 py-2 bg-nayarit-burgundy hover:bg-[#4A0D26] text-white font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all shadow-xs"
+                className="px-3.5 py-1.5 bg-[#5E1232] hover:bg-[#4a0d27] text-white font-bold text-xs rounded-lg flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
               >
                 <PlusCircle size={14} /> Nueva Solicitud
               </button>
@@ -492,6 +484,7 @@ export default function DashboardPage() {
         </div>
 
       </div>
+
 
       {/* ── 4. MODAL DE DETALLE Y DICTAMEN DE EXPEDIENTE IN-PLACE ──────────────── */}
       {selectedSolicitud && (

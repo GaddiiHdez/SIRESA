@@ -498,27 +498,27 @@ export default function NuevaSolicitudPage({ onSaveSuccess }) {
   // Paso 0: Selección de Módulo
   if (step === 0) {
     return (
-      <div className="space-y-6 animate-fadeIn">
+      <div className="space-y-5 animate-fadeIn">
         {savedDraft && (
-          <div className="p-5 bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-white rounded-3xl border border-amber-300 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="flex items-center gap-3.5">
-              <div className="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-900 border border-amber-400 flex items-center justify-center shrink-0 shadow-sm">
-                <Bookmark className="w-6 h-6 text-amber-700" />
+          <div className="p-4 md:p-5 bg-amber-50/80 rounded-xl border border-amber-300 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-amber-100 text-amber-900 border border-amber-300 flex items-center justify-center shrink-0">
+                <Bookmark className="w-5 h-5" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="px-2 py-0.5 bg-amber-100 text-amber-900 border border-amber-300 rounded-full text-[9px] font-black uppercase tracking-wider">
-                    Borrador en Memoria
+                  <span className="px-2 py-0.5 bg-amber-200/80 text-amber-900 rounded text-[10px] font-bold uppercase">
+                    Borrador Guardado
                   </span>
-                  <span className="text-[11px] text-slate-400 font-mono">
+                  <span className="text-[11px] text-slate-500">
                     {savedDraft.timestamp ? new Date(savedDraft.timestamp).toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' }) : 'Reciente'}
                   </span>
                 </div>
-                <h4 className="text-sm font-black text-slate-900 mt-1 font-outfit">
-                  Tienes una solicitud sin terminar: {formatModulo(savedDraft.moduloTipo)}
+                <h4 className="text-sm font-bold text-slate-900 mt-0.5">
+                  Solicitud en progreso: {formatModulo(savedDraft.moduloTipo)}
                 </h4>
-                <p className="text-xs text-slate-600">
-                  Productor: <strong>{savedDraft.formData?.productor?.nombre ? `${savedDraft.formData.productor.nombre} ${savedDraft.formData.productor.apellidoPaterno || ''}` : 'Sin nombre asignado'}</strong> • Guardado en el Paso {savedDraft.step} de 5
+                <p className="text-xs text-slate-600 font-medium">
+                  Productor: <strong>{savedDraft.formData?.productor?.nombre ? `${savedDraft.formData.productor.nombre} ${savedDraft.formData.productor.apellidoPaterno || ''}` : 'Sin nombre asignado'}</strong> • Paso {savedDraft.step} de 5
                 </p>
               </div>
             </div>
@@ -527,7 +527,7 @@ export default function NuevaSolicitudPage({ onSaveSuccess }) {
               <button
                 type="button"
                 onClick={handleRestoreDraft}
-                className="px-4 py-2.5 bg-[#5E1232] hover:bg-[#4a0d27] text-white rounded-xl text-xs font-black transition-all shadow-sm cursor-pointer flex items-center gap-1.5 uppercase tracking-wider"
+                className="px-4 py-2 bg-[#5E1232] hover:bg-[#4a0d27] text-white rounded-lg text-xs font-bold transition-colors shadow-xs cursor-pointer flex items-center gap-1.5"
               >
                 <Sparkles className="w-3.5 h-3.5 text-amber-300" />
                 <span>Retomar Solicitud</span>
@@ -535,7 +535,7 @@ export default function NuevaSolicitudPage({ onSaveSuccess }) {
               <button
                 type="button"
                 onClick={handleDiscardDraft}
-                className="px-3.5 py-2.5 bg-white hover:bg-slate-100 text-rose-600 border border-rose-200 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
+                className="px-3 py-2 bg-white hover:bg-slate-100 text-rose-600 border border-rose-200 rounded-lg text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span>Descartar</span>
@@ -581,11 +581,11 @@ export default function NuevaSolicitudPage({ onSaveSuccess }) {
 
       {/* 2. Área del Formulario (Ancho Completo) */}
       <div className="flex-1 flex flex-col h-full overflow-hidden">
-        <div className="flex-1 flex flex-col overflow-hidden bg-white border border-slate-200/80 rounded-3xl shadow-sm relative">
-          <div className="absolute top-0 left-0 w-full h-[4px] bg-gradient-to-r from-nayarit-gold via-yellow-400 to-nayarit-lightGreen z-10" />
+        <div className="flex-1 flex flex-col overflow-hidden bg-white border border-slate-200 rounded-xl shadow-xs relative">
+          <div className="absolute top-0 left-0 w-full h-[3px] bg-[#5E1232] z-10" />
 
           {/* Área de scroll del formulario */}
-          <div className="flex-1 overflow-y-auto p-6 md:p-8 pb-32 md:pb-24 space-y-6">
+          <div className="flex-1 overflow-y-auto p-5 md:p-7 pb-32 md:pb-24 space-y-6">
             {step === 1 && (
               <PasoGenerales
                 formData={formData}
@@ -632,11 +632,11 @@ export default function NuevaSolicitudPage({ onSaveSuccess }) {
           </div>
 
           {/* Barra de botones sticky al fondo */}
-          <div className="flex-shrink-0 bg-slate-50/95 backdrop-blur-sm border-t border-slate-100 py-4 px-6 md:px-8 flex justify-between items-center rounded-b-3xl z-10">
+          <div className="flex-shrink-0 bg-slate-50 border-t border-slate-200 py-3.5 px-6 md:px-8 flex justify-between items-center rounded-b-xl z-10">
             <button
               type="button"
               onClick={handleBack}
-              className={`flex items-center gap-1.5 px-6 py-3.5 border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 rounded-xl text-xs font-extrabold transition-smooth uppercase tracking-wider shadow-xs cursor-pointer ${
+              className={`flex items-center gap-1 px-4 py-2.5 border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 rounded-lg text-xs font-semibold transition-colors shadow-xs cursor-pointer ${
                 step === activeSteps[0] ? 'opacity-0 pointer-events-none' : ''
               }`}
             >
@@ -644,13 +644,13 @@ export default function NuevaSolicitudPage({ onSaveSuccess }) {
               Atrás
             </button>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5">
               {/* Botón Guardar Borrador */}
               <button
                 type="button"
                 onClick={handleManualSaveDraft}
-                className="flex items-center gap-1.5 px-4 py-3.5 border border-amber-300 bg-amber-50/70 hover:bg-amber-100 text-amber-900 rounded-xl text-xs font-black transition-smooth shadow-xs uppercase tracking-wider cursor-pointer font-sans"
-                title="Guardar progreso actual en la memoria del navegador"
+                className="flex items-center gap-1.5 px-3.5 py-2.5 border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 rounded-lg text-xs font-bold transition-colors shadow-xs cursor-pointer"
+                title="Guardar borrador"
               >
                 <Bookmark className="w-4 h-4 text-amber-700" />
                 <span>Guardar Borrador</span>
@@ -661,7 +661,7 @@ export default function NuevaSolicitudPage({ onSaveSuccess }) {
                   type="button"
                   onClick={handleSave}
                   disabled={loading}
-                  className="flex items-center gap-1.5 px-8 py-3.5 bg-nayarit-green hover:bg-nayarit-lightGreen text-white rounded-xl text-xs font-extrabold transition-smooth shadow-md shadow-nayarit-green/10 uppercase tracking-wider active:scale-95 disabled:opacity-50 cursor-pointer"
+                  className="flex items-center gap-1.5 px-6 py-2.5 bg-[#5E1232] hover:bg-[#4a0d26] text-white rounded-lg text-xs font-bold transition-colors shadow-xs disabled:opacity-50 cursor-pointer"
                 >
                   {loading ? (
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -676,7 +676,7 @@ export default function NuevaSolicitudPage({ onSaveSuccess }) {
                 <button
                   type="button"
                   onClick={handleNext}
-                  className="flex items-center gap-1.5 px-8 py-3.5 bg-nayarit-green hover:bg-nayarit-lightGreen text-white rounded-xl text-xs font-extrabold transition-smooth shadow-md shadow-nayarit-green/10 uppercase tracking-wider active:scale-95 cursor-pointer"
+                  className="flex items-center gap-1 px-6 py-2.5 bg-[#5E1232] hover:bg-[#4a0d26] text-white rounded-lg text-xs font-bold transition-colors shadow-xs cursor-pointer"
                 >
                   Siguiente
                   <ChevronRight className="w-4 h-4" />
@@ -689,3 +689,4 @@ export default function NuevaSolicitudPage({ onSaveSuccess }) {
     </div>
   );
 }
+

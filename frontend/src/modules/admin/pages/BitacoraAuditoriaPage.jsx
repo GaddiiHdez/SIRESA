@@ -149,24 +149,18 @@ export default function BitacoraAuditoriaPage() {
   return (
     <div className="space-y-6 animate-fadeIn pb-12">
       {/* ── CABECERA INSTITUCIONAL SUPERADMIN ───────────────────────────────────── */}
-      <div className="bg-gradient-to-r from-slate-900 via-slate-850 to-[#5E1232] text-white rounded-3xl p-6 md:p-8 shadow-xl border border-white/10 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-[#C29A52]/10 rounded-full blur-3xl pointer-events-none" />
-        
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2">
-              <span className="bg-amber-400/20 text-amber-300 border border-amber-400/30 text-[10px] px-3 py-1 rounded-full font-black uppercase tracking-widest flex items-center gap-1.5">
-                <Lock size={12} className="text-amber-400" />
-                Exclusivo Super Administrador
-              </span>
-              <span className="text-xs text-slate-400">SIRESA Security Core</span>
-            </div>
-            <h1 className="text-2xl md:text-3xl font-black tracking-tight text-white flex items-center gap-3">
-              <ShieldAlert className="w-8 h-8 text-nayarit-gold shrink-0" />
-              Bitácora de Auditoría Forense
+      <div className="bg-[#5E1232] text-white rounded-xl p-5 md:p-6 shadow-sm border border-[#5E1232] relative">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <span className="text-[11px] font-bold text-[#DAB777] uppercase tracking-wider block">
+              Registro Oficial de Seguridad y Trazabilidad
+            </span>
+            <h1 className="text-xl md:text-2xl font-bold tracking-tight text-white flex items-center gap-2.5">
+              <ShieldAlert className="w-6 h-6 text-[#DAB777] shrink-0" />
+              Bitácora de Auditoría
             </h1>
-            <p className="text-xs md:text-sm text-slate-300 max-w-2xl leading-relaxed font-normal">
-              Registro inmutable de trazabilidad gubernamental. Supervisa en tiempo real cada modificación presupuestal, dictámenes de expedientes, accesos de usuarios y operaciones sensibles para cumplimiento ante la SFP y ASF.
+            <p className="text-xs md:text-sm text-slate-200 max-w-2xl font-medium">
+              Historial de movimientos, cambios de estatus en solicitudes, ajustes presupuestales y accesos al sistema.
             </p>
           </div>
 
@@ -174,14 +168,14 @@ export default function BitacoraAuditoriaPage() {
             <button
               onClick={() => { fetchLogs(); fetchStats(); }}
               disabled={loading}
-              className="flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold transition-all border border-white/15 cursor-pointer disabled:opacity-50"
+              className="flex items-center gap-2 px-3.5 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs font-semibold transition-colors border border-white/15 cursor-pointer disabled:opacity-50"
             >
               <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
               <span>Actualizar</span>
             </button>
             <button
               onClick={handleExportCsv}
-              className="flex items-center gap-2 px-4 py-2.5 bg-nayarit-gold hover:bg-[#d8ae62] text-[#200210] rounded-xl text-xs font-extrabold transition-all shadow-md cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+              className="flex items-center gap-2 px-3.5 py-2 bg-[#C29A52] hover:bg-[#b08842] text-[#200210] rounded-lg text-xs font-bold transition-colors shadow-xs cursor-pointer"
             >
               <Download size={14} />
               <span>Exportar Bitácora</span>
@@ -191,32 +185,29 @@ export default function BitacoraAuditoriaPage() {
 
         {/* METRICAS DE AUDITORIA */}
         {stats && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mt-6 pt-6 border-t border-white/10">
-            <div className="bg-white/5 rounded-2xl p-4 border border-white/10">
-              <span className="text-[11px] text-slate-400 font-bold uppercase tracking-wider block">Registros Totales</span>
-              <span className="text-2xl font-black text-white mt-1 block">{stats.totalRegistros}</span>
-              <span className="text-[10px] text-slate-400 mt-0.5 block">Eventos inmutables en BD</span>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-5 pt-5 border-t border-white/15">
+            <div className="bg-white/10 rounded-lg p-3 border border-white/10">
+              <span className="text-[11px] text-slate-300 font-semibold uppercase tracking-wider block">Total de Eventos</span>
+              <span className="text-xl md:text-2xl font-bold text-white mt-0.5 block">{stats.totalRegistros}</span>
             </div>
-            <div className="bg-white/5 rounded-2xl p-4 border border-white/10">
-              <span className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Actividad Hoy</span>
-              <span className="text-2xl font-black text-amber-300 mt-1 block">+{stats.eventosHoy}</span>
-              <span className="text-[10px] text-slate-400 mt-0.5 block">Operaciones registradas hoy</span>
+            <div className="bg-white/10 rounded-lg p-3 border border-white/10">
+              <span className="text-[11px] text-slate-300 font-semibold uppercase tracking-wider block">Actividad Hoy</span>
+              <span className="text-xl md:text-2xl font-bold text-amber-300 mt-0.5 block">+{stats.eventosHoy}</span>
             </div>
-            <div className="bg-white/5 rounded-2xl p-4 border border-white/10">
-              <span className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Módulos Auditados</span>
-              <span className="text-2xl font-black text-white mt-1 block">{stats.porModulo?.length || 5}</span>
-              <span className="text-[10px] text-slate-400 mt-0.5 block">Puntos de control activos</span>
+            <div className="bg-white/10 rounded-lg p-3 border border-white/10">
+              <span className="text-[11px] text-slate-300 font-semibold uppercase tracking-wider block">Módulos Auditados</span>
+              <span className="text-xl md:text-2xl font-bold text-white mt-0.5 block">{stats.porModulo?.length || 5}</span>
             </div>
-            <div className="bg-white/5 rounded-2xl p-4 border border-white/10">
-              <span className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Usuario Más Activo</span>
-              <span className="text-lg font-black text-emerald-300 mt-1 block truncate">
+            <div className="bg-white/10 rounded-lg p-3 border border-white/10">
+              <span className="text-[11px] text-slate-300 font-semibold uppercase tracking-wider block">Usuario Más Activo</span>
+              <span className="text-lg font-bold text-emerald-300 mt-0.5 block truncate">
                 @{stats.topUsuarios?.[0]?.username || 'N/A'}
               </span>
-              <span className="text-[10px] text-slate-400 mt-0.5 block">{stats.topUsuarios?.[0]?.total || 0} acciones realizadas</span>
             </div>
           </div>
         )}
       </div>
+
 
       {/* ── BARRA DE BÚSQUEDA Y FILTROS ────────────────────────────────────────── */}
       <form onSubmit={handleSearchSubmit} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">

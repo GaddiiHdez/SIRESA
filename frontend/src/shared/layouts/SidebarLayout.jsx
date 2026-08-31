@@ -570,7 +570,7 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
         </header>
 
         {/* NAV BAR SUPERIOR (DESKTOP) */}
-        <header className="print:hidden hidden md:flex items-center justify-between px-4 lg:px-6 xl:px-8 py-2.5 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shrink-0 shadow-sm text-slate-800 transition-all duration-300 relative z-30 min-w-0">
+        <header className="print:hidden hidden md:flex items-center justify-between px-4 lg:px-6 py-2.5 bg-white border-b border-slate-200 shrink-0 shadow-xs text-slate-800 transition-all duration-300 relative z-30 min-w-0">
           <div className="flex items-center gap-2.5 lg:gap-3.5 min-w-0 mr-2 shrink">
             <img 
               src="/logo-sdr.png" 
@@ -579,14 +579,14 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
             />
             <div className="h-6 w-[1px] bg-slate-200 shrink-0 hidden sm:block" />
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="p-1.5 lg:p-2 bg-nayarit-gold/10 rounded-xl text-nayarit-gold border border-nayarit-gold/25 flex items-center justify-center shrink-0 shadow-2xs">
+              <div className="p-1.5 bg-slate-100 rounded-lg text-[#5E1232] border border-slate-200 flex items-center justify-center shrink-0">
                 {IconComponent && <IconComponent className="w-4 h-4 lg:w-5 lg:h-5" />}
               </div>
               <div className="min-w-0">
-                <h1 className="text-sm lg:text-base font-extrabold text-slate-900 tracking-tight leading-tight uppercase font-outfit truncate">
+                <h1 className="text-sm lg:text-base font-bold text-slate-900 tracking-tight leading-tight uppercase truncate">
                   {captureState.title}
                 </h1>
-                <p className="text-[10px] lg:text-[11px] text-slate-500 font-semibold tracking-normal truncate hidden sm:block">
+                <p className="text-[10px] lg:text-[11px] text-slate-500 font-medium tracking-normal truncate hidden sm:block">
                   {captureState.subtitle}
                 </p>
               </div>
@@ -598,6 +598,7 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
 
             {/* Centro de Notificaciones Inteligente */}
             <CentroNotificacionesMenu onSelectSolicitud={(sol) => setSelectedSolicitud(sol)} />
+
 
             {/* Acciones dinámicas de cada módulo */}
             {captureState.actions && captureState.actions.map(act => {
