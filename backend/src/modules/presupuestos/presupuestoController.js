@@ -17,6 +17,7 @@
 import prisma from '../../shared/config/db.js';
 import { clearStatsCache } from '../solicitudes/solicitudService.js';
 import logger from '../../shared/utils/logger.js';
+import { registrarAuditoria } from '../../shared/services/auditService.js';
 
 /**
  * PATCH/PUT /api/presupuestos/
@@ -79,6 +80,15 @@ export async function actualizarPresupuesto(req, res) {
 
     // Invalidar la caché de estadísticas para que el dashboard refleje los cambios al instante
     clearStatsCache();
+
+    // Registrar en la bitácora de auditoría
+    registrarAuditoria({
+      accion: 'AJUSTE_PRESUPUESTO',
+      modulo: 'PRESUPUESTOS',
+      detalles: `Ajuste presupuestal de ${results.length} sector(es) productivo(s)`,
+      valoresNue: results.map(r => ({ sector: r.sector, montoAsignado: Number(r.montoAsignado) })),
+      req
+    });
 
     logger.info(`Presupuestos sectoriales actualizados (${results.length} sectores) por usuario: ${req.user?.username}`);
 

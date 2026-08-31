@@ -484,3 +484,44 @@ export async function apiBuscarProductor(queryStr) {
   });
   return handleResponse(res, 'Error al verificar la CURP / RFC del productor.');
 }
+
+// ─── Bitácora de Auditoría Forense (SUPERADMIN) ───────────────────────────────
+
+/**
+ * Consulta la bitácora de auditoría paginada y filtrada.
+ * @param {Object} params - Filtros y paginación
+ * @returns {Promise<{totalItems: number, totalPages: number, page: number, limit: number, logs: Array}>}
+ */
+export async function apiGetAuditLogs(params = {}) {
+  const query = new URLSearchParams(params).toString();
+  const res = await fetch(`${API_URL}/audit?${query}`, {
+    headers: getAuthHeaders()
+  });
+  return handleResponse(res, 'Error al consultar la bitácora de auditoría.');
+}
+
+/**
+ * Consulta estadísticas y métricas analíticas de auditoría.
+ * @returns {Promise<Object>} Resumen de actividad
+ */
+export async function apiGetAuditStats() {
+  const res = await fetch(`${API_URL}/audit/stats`, {
+    headers: getAuthHeaders()
+  });
+  return handleResponse(res, 'Error al consultar estadísticas de auditoría.');
+}
+
+// ─── Reportes Ejecutivos para Informe de Gobierno ─────────────────────────────
+
+/**
+ * Obtiene los datos consolidados y agregados para el Informe de Gobierno estatal.
+ * @param {Object} params - Filtros (anio, sector, municipio)
+ * @returns {Promise<Object>} Resumen de inversión, cobertura y sectores
+ */
+export async function apiGetReporteEjecutivo(params = {}) {
+  const query = new URLSearchParams(params).toString();
+  const res = await fetch(`${API_URL}/reportes/ejecutivo?${query}`, {
+    headers: getAuthHeaders()
+  });
+  return handleResponse(res, 'Error al generar el reporte ejecutivo.');
+}

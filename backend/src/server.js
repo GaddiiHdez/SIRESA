@@ -32,6 +32,8 @@ import uploadRoutes from './modules/upload/uploadRoutes.js';
 import presupuestoRoutes from './modules/presupuestos/presupuestoRoutes.js';
 import userRoutes from './modules/users/userRoutes.js';
 import directorioRoutes from './modules/directorio/directorioRoutes.js';
+import auditRoutes from './modules/audit/auditRoutes.js';
+import reporteRoutes from './modules/reportes/reporteRoutes.js';
 import { autoDeduplicateProductores } from './modules/solicitudes/solicitudService.js';
 
 // Manejadores globales de errores HTTP
@@ -114,6 +116,8 @@ app.use('/api/upload', uploadRoutes);       // Subida de archivos PDF e imágene
 app.use('/api/presupuestos', presupuestoRoutes); // Gestión de presupuestos sectoriales
 app.use('/api/users', userRoutes);          // Gestión de usuarios del sistema (RBAC)
 app.use('/api/directorio', directorioRoutes); // Módulo de Geodirectorio y Visor Cartográfico
+app.use('/api/audit', auditRoutes);           // Bitácora de Auditoría Forense (SUPERADMIN)
+app.use('/api/reportes', reporteRoutes);     // Reportes Ejecutivos para Informe de Gobierno
 
 // ─── C-4: Servicio Protegido de Archivos Estáticos ─────────────────────────────
 // Los archivos subidos (PDFs, imágenes) solo son accesibles si el cliente presenta

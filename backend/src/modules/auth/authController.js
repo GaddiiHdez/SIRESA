@@ -15,6 +15,7 @@ import prisma from '../../shared/config/db.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import logger from '../../shared/utils/logger.js';
+import { registrarAuditoria } from '../../shared/services/auditService.js';
 
 // Clave secreta para firmar los tokens JWT.
 // DEBE coincidir con la usada en el middleware de autenticación.
@@ -89,6 +90,17 @@ export async function login(req, res) {
       JWT_SECRET,
       { expiresIn: '10h' }  // El token expira después de 10 horas (jornada laboral completa)
     );
+
+    // Registrar en la bitácora de auditoría
+    registrarAuditoria({
+      accion: 'LOGIN',
+      modulo: 'AUTH',
+      detalles: `Inicio de sesión exitoso de @${user.username} (${effectiveRole})`,
+      req,
+      usuarioId: user.id,
+      username: user.username,
+      userRole: effectiveRole
+    });
 
     // Devolver el token y los datos básicos del usuario al cliente
     res.json({

@@ -22,6 +22,7 @@
 import prisma from '../../shared/config/db.js';
 import bcrypt from 'bcrypt';
 import logger from '../../shared/utils/logger.js';
+import { registrarAuditoria } from '../../shared/services/auditService.js';
 
 /**
  * GET /api/users/
@@ -101,6 +102,15 @@ export async function createUser(req, res) {
         updatedAt: true,
         // passwordHash omitido de la respuesta
       },
+    });
+
+    // Registrar en la bitácora de auditoría
+    registrarAuditoria({
+      accion: 'CREAR_USUARIO',
+      modulo: 'USUARIOS',
+      detalles: `Creación del usuario @${newUser.username} con rol ${newUser.role}`,
+      valoresNue: { username: newUser.username, name: newUser.name, role: newUser.role },
+      req
     });
 
     res.status(201).json(newUser);
@@ -192,6 +202,16 @@ export async function updateUser(req, res) {
       },
     });
 
+    // Registrar en la bitácora de auditoría
+    registrarAuditoria({
+      accion: 'EDITAR_USUARIO',
+      modulo: 'USUARIOS',
+      detalles: `Modificación de datos del usuario @${targetUser.username}`,
+      valoresAnt: { username: targetUser.username, name: targetUser.name, role: targetUser.role },
+      valoresNue: { username: updatedUser.username, name: updatedUser.name, role: updatedUser.role, passwordChanged: Boolean(password && password.trim() !== '') },
+      req
+    });
+
     res.json(updatedUser);
   } catch (error) {
     logger.error('Error al actualizar usuario', { error: error.message });
@@ -243,6 +263,15 @@ export async function deleteUser(req, res) {
     }
 
     await prisma.user.delete({ where: { id } });
+
+    // Registrar en la bitácora de auditoría
+    registrarAuditoria({
+      accion: 'ELIMINAR_USUARIO',
+      modulo: 'USUARIOS',
+      detalles: `Eliminación de la cuenta de usuario @${targetUser.username} (${targetUser.role})`,
+      valoresAnt: { username: targetUser.username, name: targetUser.name, role: targetUser.role },
+      req
+    });
 
     res.json({ message: `Usuario '${targetUser.username}' eliminado correctamente.` });
   } catch (error) {

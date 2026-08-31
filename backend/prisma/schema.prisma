@@ -323,3 +323,25 @@ model PresupuestoSector {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
+
+// Bitácora de auditoría inmutable del sistema (SUPERADMIN)
+model AuditLog {
+  id          String   @id @default(uuid())
+  accion      String   // LOGIN, LOGOUT, CREAR_SOLICITUD, CAMBIO_ESTATUS, CARGA_DOCUMENTO, AJUSTE_PRESUPUESTO, CREAR_USUARIO, EDITAR_USUARIO, ELIMINAR_USUARIO
+  modulo      String   // AUTH, SOLICITUDES, PRESUPUESTOS, USUARIOS, DOCUMENTOS, REPORTES
+  detalles    String?  // Resumen legible del evento
+  valoresAnt  Json?    // Snapshot previo de los datos
+  valoresNue  Json?    // Snapshot nuevo de los datos
+  usuarioId   String?  // ID del usuario responsable
+  username    String?  // Username del responsable
+  userRole    String?  // Rol del responsable al momento de la acción
+  ipAddress   String?  // Dirección IP de origen
+  userAgent   String?  // Agente de usuario (navegador/dispositivo)
+  createdAt   DateTime @default(now())
+
+  @@index([accion])
+  @@index([modulo])
+  @@index([usuarioId])
+  @@index([username])
+  @@index([createdAt])
+}

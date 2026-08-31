@@ -18,6 +18,7 @@
 
 import prisma from '../../shared/config/db.js';
 import logger from '../../shared/utils/logger.js';
+import { registrarAuditoria } from '../../shared/services/auditService.js';
 
 /**
  * Convierte valores vacíos, null o undefined en `undefined`.
@@ -362,6 +363,22 @@ export async function createSolicitud(data, user) {
   // Invalidar la caché del dashboard para reflejar el nuevo registro
   clearStatsCache();
 
+  // Registrar en la bitácora de auditoría
+  registrarAuditoria({
+    accion: 'CREAR_SOLICITUD',
+    modulo: 'SOLICITUDES',
+    detalles: `Registro de nuevo expediente folio ${result.folio} (${result.moduloTipo})`,
+    valoresNue: {
+      folio: result.folio,
+      moduloTipo: result.moduloTipo,
+      programa: result.programa,
+      productor: result.productor?.nombre || result.productor?.nombreOrganizacion || 'N/A'
+    },
+    usuarioId: user?.id,
+    username: user?.username,
+    userRole: user?.role
+  });
+
   return result;
 }
 
@@ -578,6 +595,19 @@ export async function updateSolicitudEstatus(id, estatus, comentario, user) {
   });
 
   clearStatsCache();
+
+  // Registrar en la bitácora de auditoría
+  registrarAuditoria({
+    accion: 'CAMBIO_ESTATUS',
+    modulo: 'SOLICITUDES',
+    detalles: `Cambio de estatus del expediente ${result.folio}: ${solicitudActual.status} → ${estatus}`,
+    valoresAnt: { status: solicitudActual.status },
+    valoresNue: { status: estatus, comentario: comentario || null },
+    usuarioId: user?.id,
+    username: user?.username,
+    userRole: user?.role
+  });
+
   return result;
 }
 
@@ -622,6 +652,15 @@ export async function updateSolicitudDocumentos(id, documents) {
   });
 
   clearStatsCache();
+
+  // Registrar en la bitácora de auditoría
+  registrarAuditoria({
+    accion: 'CARGA_DOCUMENTO',
+    modulo: 'DOCUMENTOS',
+    detalles: `Digitalización y actualización de documentos para el expediente ${updated.folio}`,
+    valoresNue: { folio: updated.folio, documentosActualizados: Object.keys(dataToUpdate) }
+  });
+
   return updated;
 }
 

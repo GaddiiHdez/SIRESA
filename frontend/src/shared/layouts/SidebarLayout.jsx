@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, BarChart3, FileSpreadsheet, PlusCircle, LogOut, ShieldCheck, User, Menu, ChevronLeft, Sparkles, X, Users, PieChart, Search, Compass } from 'lucide-react';
+import { LayoutDashboard, BarChart3, FileSpreadsheet, PlusCircle, LogOut, ShieldCheck, User, Menu, ChevronLeft, Sparkles, X, Users, PieChart, Search, Compass, ShieldAlert, Landmark } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { formatModulo } from '../utils/formatters';
 import { getSectorIcon } from '../config/sectoresMetadata';
@@ -266,6 +266,17 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
                   <Compass className={`w-4.5 h-4.5 shrink-0 ${currentPath === '/directorio' ? 'text-nayarit-gold' : 'text-slate-300'}`} />
                   Geodirectorio Rural
                 </button>
+                <button
+                  onClick={() => navigate('/reportes')}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-smooth border-l-4 ${
+                    currentPath === '/reportes'
+                      ? 'bg-gradient-to-r from-[#C29A52]/35 via-[#C29A52]/10 to-transparent text-white border-l-nayarit-gold shadow-sm'
+                      : 'hover:bg-white/5 text-slate-300 hover:text-white border-l-transparent'
+                  }`}
+                >
+                  <Landmark className={`w-4.5 h-4.5 shrink-0 ${currentPath === '/reportes' ? 'text-nayarit-gold' : 'text-slate-300'}`} />
+                  Reportes Ejecutivos
+                </button>
                 {(currentUser?.role === 'SUPERADMIN' || currentUser?.role === 'ADMINISTRADOR') && (
                   <button
                     onClick={() => navigate('/usuarios')}
@@ -277,6 +288,19 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
                   >
                     <ShieldCheck className={`w-4.5 h-4.5 shrink-0 ${currentPath === '/usuarios' ? 'text-nayarit-gold' : 'text-slate-300'}`} />
                     Gestión de Usuarios
+                  </button>
+                )}
+                {currentUser?.role === 'SUPERADMIN' && (
+                  <button
+                    onClick={() => navigate('/bitacora')}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-smooth border-l-4 ${
+                      currentPath === '/bitacora'
+                        ? 'bg-gradient-to-r from-[#C29A52]/35 via-[#C29A52]/10 to-transparent text-white border-l-nayarit-gold shadow-sm'
+                        : 'hover:bg-white/5 text-slate-300 hover:text-white border-l-transparent'
+                    }`}
+                  >
+                    <ShieldAlert className={`w-4.5 h-4.5 shrink-0 ${currentPath === '/bitacora' ? 'text-amber-400' : 'text-slate-300'}`} />
+                    Bitácora de Auditoría
                   </button>
                 )}
               </>
@@ -351,6 +375,17 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
                 >
                   <Compass className={`w-5 h-5 ${currentPath === '/directorio' ? 'text-nayarit-gold' : 'text-slate-300'}`} />
                 </button>
+                <button
+                  onClick={() => navigate('/reportes')}
+                  title="Reportes Ejecutivos"
+                  className={`w-12 h-12 flex items-center justify-center rounded-xl transition-smooth border-l-4 ${
+                    currentPath === '/reportes'
+                      ? 'bg-gradient-to-r from-[#C29A52]/35 to-transparent text-white border-l-nayarit-gold shadow-sm'
+                      : 'hover:bg-white/5 text-slate-300 hover:text-white border-l-transparent'
+                  }`}
+                >
+                  <Landmark className={`w-5 h-5 ${currentPath === '/reportes' ? 'text-nayarit-gold' : 'text-slate-300'}`} />
+                </button>
                 {(currentUser?.role === 'SUPERADMIN' || currentUser?.role === 'ADMINISTRADOR') && (
                   <button
                     onClick={() => navigate('/usuarios')}
@@ -362,6 +397,19 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
                     }`}
                   >
                     <ShieldCheck className={`w-5 h-5 ${currentPath === '/usuarios' ? 'text-nayarit-gold' : 'text-slate-300'}`} />
+                  </button>
+                )}
+                {currentUser?.role === 'SUPERADMIN' && (
+                  <button
+                    onClick={() => navigate('/bitacora')}
+                    title="Bitácora de Auditoría Forense"
+                    className={`w-12 h-12 flex items-center justify-center rounded-xl transition-smooth border-l-4 ${
+                      currentPath === '/bitacora'
+                        ? 'bg-gradient-to-r from-[#C29A52]/35 to-transparent text-white border-l-nayarit-gold shadow-sm'
+                        : 'hover:bg-white/5 text-slate-300 hover:text-white border-l-transparent'
+                    }`}
+                  >
+                    <ShieldAlert className={`w-5 h-5 ${currentPath === '/bitacora' ? 'text-amber-400' : 'text-slate-300'}`} />
                   </button>
                 )}
               </div>

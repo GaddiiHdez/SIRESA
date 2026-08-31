@@ -12,16 +12,27 @@ Todas las modificaciones, actualizaciones, correcciones y nuevas funcionalidades
 
 ---
 
-## [Unreleased] — Trabajo en Proceso
-### Planificado para Septiembre - Diciembre 2026
-- **Módulo de Reportes Avanzados:** Exportación masiva en Excel/PDF de expedientes y dictámenes.
-- **Notificaciones Automáticas:** Alertas vía correo/SMS de estatus de solicitudes a productores.
-- **Firma Digital de Expedientes:** Integración de firma electrónica para analistas y supervisores.
-- **Auditoría Avanzada:** Log de traza de acciones por usuario en tiempo real.
+## [1.3.0] — 2026-08-31 (Versión Actual en Producción)
+### Auditoría Forense & Trazabilidad Gubernamental (SUPERADMIN)
+- **Modelo `AuditLog` Inmutable en PostgreSQL:** Esquema estructurado para registrar transacciones sensibles con soporte JSON de snapshots previos y nuevos (`valoresAnt`, `valoresNue`), usuario, rol, IP y User-Agent.
+- **Servicio Asíncrono `auditService.js`:** Registro no bloqueante integrado en puntos de control críticos:
+  - `authController.js`: Inicios de sesión y accesos al sistema.
+  - `solicitudService.js`: Alta de expedientes, cambios de estatus de trámite y digitalización de documentos.
+  - `presupuestoController.js`: Modificaciones y ajustes de techos presupuestales sectoriales.
+  - `userController.js`: Alta, modificación y eliminación de usuarios.
+- **Módulo y Rutas de Auditoría (`/api/audit`):** Endpoints paginados y de analítica con seguridad estricta `requireRole('SUPERADMIN')` (`403 Forbidden` para otros roles).
+- **Interfaz Forense `BitacoraAuditoriaPage.jsx`:** Vista con KPIs de actividad, filtros multicriterio, exportación oficial a CSV (para SFP / ASF) y **Visor de Evidencia Forense (`Diff Viewer`)** con comparador visual de estados JSON.
+
+### Inteligencia de Datos & Reportes para Informe de Gobierno
+- **Motor Agregador de Reportes Ejecutivos (`/api/reportes/ejecutivo`):** Consolidación en tiempo real de inversión estatal vs. aportación de productores, avance presupuestal por los 5 sectores productivos, cobertura en los 20 municipios e indicadores de inclusión social.
+- **Módulo `ReportesEjecutivosPage.jsx`:**
+  - **Cédula Oficial con Membrete Institucional del Gobierno del Estado de Nayarit:** Resumen ejecutivo de alto impacto con cuadrícula de KPIs, matriz sectorial con semáforos de avance, distribución territorial municipal y perspectiva de género / pueblos originarios.
+  - **Exportador a PDF / Impresión Oficial:** Formato optimizado para impresión ejecutiva en hoja Carta/A4 con sellos y validaciones técnicas institucionales.
+  - **Exportador Multidimensional a Excel:** Descarga con un solo clic de la matriz completa con UTF-8 BOM.
 
 ---
 
-## [1.2.1] — 2026-08-28 (Versión Actual en Producción)
+## [1.2.1] — 2026-08-28
 ### Seguridad & Hardening
 - **CORS Estricto:** Eliminada la excepción wildcard de `*.vercel.app` en `server.js`. Las peticiones ahora se restringen estrictamente a los orígenes declarados en `CORS_ORIGINS`.
 - **Inspección de Esquema y Sanitización:** Eliminado campo no declarado `indigo` en `solicitudService.js`.

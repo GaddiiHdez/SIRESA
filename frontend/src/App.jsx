@@ -43,6 +43,8 @@ const ConsultaExpedientesPage  = lazy(() => import('./modules/solicitudes/pages/
 const ProductoresPage          = lazy(() => import('./modules/productores/pages/ProductoresPage'));
 const GeodirectorioPage        = lazy(() => import('./modules/directorio/pages/GeodirectorioPage'));
 const ConfiguracionUsuariosPage = lazy(() => import('./modules/admin/pages/ConfiguracionUsuariosPage'));
+const BitacoraAuditoriaPage    = lazy(() => import('./modules/admin/pages/BitacoraAuditoriaPage'));
+const ReportesEjecutivosPage   = lazy(() => import('./modules/dashboard/pages/ReportesEjecutivosPage'));
 
 // ─── Componente de Carga ───────────────────────────────────────────────────────
 /**
@@ -187,12 +189,25 @@ export default function App() {
                     {/* Geodirectorio y Visor Cartográfico */}
                     <Route path="/directorio" element={<GeodirectorioPage />} />
 
+                    {/* Reportes Ejecutivos para Informes de Gobierno */}
+                    <Route path="/reportes" element={<ReportesEjecutivosPage />} />
+
                     {/* Gestión de usuarios — solo SUPERADMIN y ADMINISTRADOR */}
                     <Route
                       path="/usuarios"
                       element={
                         currentUser?.role === 'SUPERADMIN' || currentUser?.role === 'ADMINISTRADOR'
                           ? <ConfiguracionUsuariosPage />
+                          : <Navigate to="/" replace /> // Redirigir si no tiene permiso
+                      }
+                    />
+
+                    {/* Bitácora de Auditoría Forense — EXCLUSIVO SUPERADMIN */}
+                    <Route
+                      path="/bitacora"
+                      element={
+                        currentUser?.role === 'SUPERADMIN'
+                          ? <BitacoraAuditoriaPage />
                           : <Navigate to="/" replace /> // Redirigir si no tiene permiso
                       }
                     />
