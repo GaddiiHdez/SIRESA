@@ -27,17 +27,22 @@ export async function getReporteEjecutivo(req, res) {
     const totalSolicitudes = await prisma.solicitud.count({ where });
     const totalProductores = await prisma.productor.count();
 
-    // 2. Monto de Inversión Total
+    // 2. Monto de Inversión Total (Campos reales de ApoyoControl: montoTotal, aportacionEstatal, aportacionSolicitante)
     const apoyoAgregado = await prisma.apoyoControl.aggregate({
-      _sum: { montoTotal: true, aportacionGob: true, aportacionProd: true },
+      _sum: { 
+        montoTotal: true, 
+        aportacionEstatal: true, 
+        aportacionSolicitante: true,
+        aportacionPrograma: true 
+      },
       where: {
         solicitud: where
       }
     });
 
     const inversionTotal = Number(apoyoAgregado._sum.montoTotal || 0);
-    const aportacionEstatal = Number(apoyoAgregado._sum.aportacionGob || 0);
-    const aportacionProductores = Number(apoyoAgregado._sum.aportacionProd || 0);
+    const aportacionEstatal = Number(apoyoAgregado._sum.aportacionEstatal || apoyoAgregado._sum.aportacionPrograma || 0);
+    const aportacionProductores = Number(apoyoAgregado._sum.aportacionSolicitante || 0);
 
     // 3. Estatus de Solicitudes
     const estatusRaw = await prisma.solicitud.groupBy({
@@ -91,27 +96,24 @@ export async function getReporteEjecutivo(req, res) {
       })
     );
 
-    // 5. Cobertura Territorial por Municipio (Top Municipios)
-    const municipiosRaw = await prisma.productor.groupBy({
-      by: ['municipio'],
-      _count: { id: true },
-      orderBy: { _count: { id: 'desc' } }
-    });
+    // 5. Cobertura Territorial por Municipio (Consulta directa rápida)
+    const coberturaMunicipiosRaw = await prisma.$queryRaw`
+      SELECT 
+        COALESCE(p.municipio, 'Sin Municipio') as municipio,
+        COUNT(DISTINCT p.id)::int as productores,
+        COALESCE(SUM(a."montoTotal")::float, 0) as inversion
+      FROM "Productor" p
+      LEFT JOIN "Solicitud" s ON s."productorId" = p.id
+      LEFT JOIN "ApoyoControl" a ON s."apoyoControlId" = a.id
+      GROUP BY p.municipio
+      ORDER BY inversion DESC, productores DESC
+    `;
 
-    const coberturaMunicipios = await Promise.all(
-      municipiosRaw.map(async (m) => {
-        const sumaMuni = await prisma.apoyoControl.aggregate({
-          _sum: { montoTotal: true },
-          where: { solicitud: { productor: { municipio: m.municipio } } }
-        });
-
-        return {
-          municipio: m.municipio || 'Sin Municipio',
-          productores: m._count.id,
-          inversion: Number(sumaMuni._sum.montoTotal || 0)
-        };
-      })
-    );
+    const coberturaMunicipios = coberturaMunicipiosRaw.map(m => ({
+      municipio: m.municipio,
+      productores: Number(m.productores),
+      inversion: Number(m.inversion)
+    }));
 
     // 6. Inclusión Social y Perspectiva de Género
     const generoRaw = await prisma.productor.groupBy({
@@ -122,8 +124,9 @@ export async function getReporteEjecutivo(req, res) {
     let mujeres = 0;
     let hombres = 0;
     generoRaw.forEach(g => {
-      if (g.genero === 'F' || g.genero === 'MUJER') mujeres += g._count.id;
-      if (g.genero === 'M' || g.genero === 'HOMBRE') hombres += g._count.id;
+      const gen = (g.genero || '').toUpperCase();
+      if (gen === 'F' || gen === 'MUJER') mujeres += g._count.id;
+      if (gen === 'M' || gen === 'HOMBRE') hombres += g._count.id;
     });
 
     const indigenas = await prisma.productor.count({
@@ -161,7 +164,7 @@ export async function getReporteEjecutivo(req, res) {
       }
     });
   } catch (error) {
-    logger.error('Error al generar reporte ejecutivo', { error: error.message });
+    logger.error('Error al generar reporte ejecutivo', { error: error.message, stack: error.stack });
     res.status(500).json({ error: 'Error interno al generar reporte ejecutivo.' });
   }
 }

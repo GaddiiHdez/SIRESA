@@ -1,6 +1,6 @@
 {
   "name": "backend",
-  "version": "1.2.1",
+  "version": "1.3.0",
   "description": "Servidor Backend en Javascript Puro para SDR Nayarit",
   "main": "src/server.js",
   "type": "module",
@@ -8,6 +8,7 @@
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
     "build": "prisma generate && prisma db push",
+    "postinstall": "prisma generate",
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",
     "prisma:migrate": "prisma migrate dev",
