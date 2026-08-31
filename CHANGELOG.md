@@ -25,6 +25,7 @@ Todas las modificaciones, actualizaciones, correcciones y nuevas funcionalidades
 ### Seguridad & Hardening
 - **CORS Estricto:** Eliminada la excepción wildcard de `*.vercel.app` en `server.js`. Las peticiones ahora se restringen estrictamente a los orígenes declarados en `CORS_ORIGINS`.
 - **Inspección de Esquema y Sanitización:** Eliminado campo no declarado `indigo` en `solicitudService.js`.
+- **Hardening de Carga de Archivos (RBAC):** Protegido el endpoint `POST /api/upload` con `requireRole('SUPERADMIN', 'ADMINISTRADOR', 'FUNCIONARIO')` para impedir la subida de documentos a usuarios con rol `ANALISTA`.
 
 ### Rendimiento & Base de Datos
 - **Índice en RFC:** Añadido `@@index([rfc])` en el modelo `Productor` (`schema.prisma`) para agilizar consultas cruzadas y validaciones de duplicidad.

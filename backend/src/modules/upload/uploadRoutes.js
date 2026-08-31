@@ -26,6 +26,7 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { authMiddleware } from '../../shared/middleware/auth.js';
+import { requireRole } from '../../shared/middleware/rbac.js';
 
 const router = express.Router();
 
@@ -79,7 +80,8 @@ const upload = multer({
 
 // ─── Endpoint POST /api/upload ─────────────────────────────────────────────────
 router.post('/',
-  authMiddleware,         // Solo usuarios autenticados pueden subir archivos
+  authMiddleware,         // Solo usuarios autenticados
+  requireRole('SUPERADMIN', 'ADMINISTRADOR', 'FUNCIONARIO'), // Solo roles con permiso de escritura
   upload.single('file'), // Acepta un solo archivo en el campo 'file'
   (req, res) => {
     if (!req.file) {
