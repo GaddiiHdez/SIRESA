@@ -11,14 +11,17 @@ import { toast } from '../utils/toast';
 import { useSessionExpiry } from '../hooks/useSessionExpiry';
 import SessionExpiryModal from '../components/SessionExpiryModal';
 import ConfirmarSalidaModal from '../components/ConfirmarSalidaModal';
+import BuscadorOmniboxModal from '../components/BuscadorOmniboxModal';
 
 export default function SidebarLayout({ currentUser, onLogout, children }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const currentPath = location.pathname;
 
   const [showOmnibox, setShowOmnibox] = useState(false);
+
   const [selectedSolicitud, setSelectedSolicitud] = useState(null);
   const [newEstatus, setNewEstatus] = useState('');
   const [estatusComentario, setEstatusComentario] = useState('');
@@ -209,6 +212,7 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
   };
 
   useEffect(() => {
+    setMobileMenuOpen(false);
     const config = ROUTE_NAVBAR_CONFIG[currentPath];
     if (config) {
       setCaptureState(prev => ({
@@ -218,6 +222,7 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
       }));
     }
   }, [currentPath]);
+
 
   useEffect(() => {
     const handleNavbarUpdate = (e) => {
@@ -612,47 +617,257 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
         </div>
       </aside>
 
+      {/* ── DRAWER LATERAL MÓVIL DESLIZABLE (OFF-CANVAS) ────────────────────── */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-[2000] flex md:hidden animate-fadeIn">
+          {/* Backdrop con desenfoque */}
+          <div 
+            onClick={() => setMobileMenuOpen(false)}
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity" 
+          />
+
+          {/* Panel Deslizable */}
+          <div className="relative w-72 max-w-[85vw] h-full bg-gradient-to-b from-[#5E1232] via-[#480c25] to-[#200210] text-white flex flex-col justify-between shadow-2xl p-4 overflow-y-auto z-10 animate-slideRight">
+            {/* Franja dorada superior */}
+            <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-nayarit-gold via-[#e3b868] to-nayarit-lightGreen" />
+
+            <div className="space-y-6 pt-2">
+              {/* Encabezado del menú móvil */}
+              <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#C29A52] via-[#dfb96f] to-[#8C6D32] p-[1.5px] shadow-sm flex items-center justify-center">
+                    <div className="w-full h-full bg-gradient-to-b from-[#4A0A24] to-[#250311] rounded-[10px] flex items-center justify-center">
+                      <span className="font-black text-sm text-transparent bg-clip-text bg-gradient-to-b from-white to-amber-200">S</span>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-bold text-sm text-white tracking-wider">SIRESA</span>
+                      <span className="text-[8px] font-bold px-1.5 py-0.25 bg-[#C29A52]/25 text-amber-300 border border-[#C29A52]/40 rounded">v1.3.0</span>
+                    </div>
+                    <span className="text-[9px] text-amber-200/80 font-semibold uppercase tracking-widest block">Desarrollo Rural</span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="p-1.5 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                  title="Cerrar menú"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Lista completa de navegación móvil */}
+              <nav className="space-y-1.5">
+                <button
+                  onClick={() => { safeNavigate('/'); setMobileMenuOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold transition-colors border-l-4 ${
+                    currentPath === '/'
+                      ? 'bg-white/15 text-white border-l-nayarit-gold font-bold'
+                      : 'hover:bg-white/5 text-slate-300 border-l-transparent'
+                  }`}
+                >
+                  <LayoutDashboard className={`w-4 h-4 shrink-0 ${currentPath === '/' ? 'text-nayarit-gold' : 'text-slate-300'}`} />
+                  <span>Mesa de Control</span>
+                </button>
+
+                <button
+                  onClick={() => { safeNavigate('/estadisticas'); setMobileMenuOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold transition-colors border-l-4 ${
+                    currentPath === '/estadisticas'
+                      ? 'bg-white/15 text-white border-l-nayarit-gold font-bold'
+                      : 'hover:bg-white/5 text-slate-300 border-l-transparent'
+                  }`}
+                >
+                  <PieChart className={`w-4 h-4 shrink-0 ${currentPath === '/estadisticas' ? 'text-nayarit-gold' : 'text-slate-300'}`} />
+                  <span>Estadísticas y Análisis</span>
+                </button>
+
+                {currentUser?.role !== 'ANALISTA' && (
+                  <button
+                    onClick={() => { safeNavigate('/registrar'); setMobileMenuOpen(false); }}
+                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold transition-colors border-l-4 ${
+                      currentPath === '/registrar'
+                        ? 'bg-white/15 text-white border-l-nayarit-gold font-bold'
+                        : 'hover:bg-white/5 text-slate-300 border-l-transparent'
+                    }`}
+                  >
+                    <PlusCircle className={`w-4 h-4 shrink-0 ${currentPath === '/registrar' ? 'text-nayarit-gold' : 'text-slate-300'}`} />
+                    <span>Nueva Solicitud</span>
+                  </button>
+                )}
+
+                <button
+                  onClick={() => { safeNavigate('/consultar'); setMobileMenuOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold transition-colors border-l-4 ${
+                    currentPath === '/consultar'
+                      ? 'bg-white/15 text-white border-l-nayarit-gold font-bold'
+                      : 'hover:bg-white/5 text-slate-300 border-l-transparent'
+                  }`}
+                >
+                  <FileSpreadsheet className={`w-4 h-4 shrink-0 ${currentPath === '/consultar' ? 'text-nayarit-gold' : 'text-slate-300'}`} />
+                  <span>Buscar Expedientes</span>
+                </button>
+
+                <button
+                  onClick={() => { safeNavigate('/productores'); setMobileMenuOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold transition-colors border-l-4 ${
+                    currentPath === '/productores'
+                      ? 'bg-white/15 text-white border-l-nayarit-gold font-bold'
+                      : 'hover:bg-white/5 text-slate-300 border-l-transparent'
+                  }`}
+                >
+                  <Users className={`w-4 h-4 shrink-0 ${currentPath === '/productores' ? 'text-nayarit-gold' : 'text-slate-300'}`} />
+                  <span>Padrón de Productores</span>
+                </button>
+
+                <button
+                  onClick={() => { safeNavigate('/directorio'); setMobileMenuOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold transition-colors border-l-4 ${
+                    currentPath === '/directorio'
+                      ? 'bg-white/15 text-white border-l-nayarit-gold font-bold'
+                      : 'hover:bg-white/5 text-slate-300 border-l-transparent'
+                  }`}
+                >
+                  <Compass className={`w-4 h-4 shrink-0 ${currentPath === '/directorio' ? 'text-nayarit-gold' : 'text-slate-300'}`} />
+                  <span>Geodirectorio Rural</span>
+                </button>
+
+                <button
+                  onClick={() => { safeNavigate('/reportes'); setMobileMenuOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold transition-colors border-l-4 ${
+                    currentPath === '/reportes'
+                      ? 'bg-white/15 text-white border-l-nayarit-gold font-bold'
+                      : 'hover:bg-white/5 text-slate-300 border-l-transparent'
+                  }`}
+                >
+                  <Landmark className={`w-4 h-4 shrink-0 ${currentPath === '/reportes' ? 'text-nayarit-gold' : 'text-slate-300'}`} />
+                  <span>Reportes Ejecutivos</span>
+                </button>
+
+                {(currentUser?.role === 'SUPERADMIN' || currentUser?.role === 'ADMINISTRADOR') && (
+                  <button
+                    onClick={() => { safeNavigate('/usuarios'); setMobileMenuOpen(false); }}
+                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold transition-colors border-l-4 ${
+                      currentPath === '/usuarios'
+                        ? 'bg-white/15 text-white border-l-nayarit-gold font-bold'
+                        : 'hover:bg-white/5 text-slate-300 border-l-transparent'
+                    }`}
+                  >
+                    <ShieldCheck className={`w-4 h-4 shrink-0 ${currentPath === '/usuarios' ? 'text-nayarit-gold' : 'text-slate-300'}`} />
+                    <span>Gestión de Usuarios</span>
+                  </button>
+                )}
+
+                {currentUser?.role === 'SUPERADMIN' && (
+                  <button
+                    onClick={() => { safeNavigate('/bitacora'); setMobileMenuOpen(false); }}
+                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold transition-colors border-l-4 ${
+                      currentPath === '/bitacora'
+                        ? 'bg-white/15 text-white border-l-nayarit-gold font-bold'
+                        : 'hover:bg-white/5 text-slate-300 border-l-transparent'
+                    }`}
+                  >
+                    <ShieldAlert className={`w-4 h-4 shrink-0 ${currentPath === '/bitacora' ? 'text-amber-400' : 'text-slate-300'}`} />
+                    <span>Bitácora de Auditoría</span>
+                  </button>
+                )}
+              </nav>
+            </div>
+
+            {/* Pie del Drawer Móvil: Perfil y Salida */}
+            <div className="pt-4 border-t border-white/10 space-y-3">
+              <div className="flex items-center gap-2.5 px-1">
+                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-nayarit-lightGold shrink-0">
+                  <User size={16} />
+                </div>
+                <div className="overflow-hidden min-w-0">
+                  <div className="font-bold text-xs truncate text-white">{currentUser?.name}</div>
+                  <span className="text-[8px] bg-nayarit-gold/20 text-nayarit-lightGold px-1.5 py-0.25 rounded border border-nayarit-gold/30 font-semibold tracking-wider uppercase inline-block">
+                    {currentUser?.role}
+                  </span>
+                </div>
+              </div>
+
+              <button
+                onClick={() => { setMobileMenuOpen(false); handleSafeLogout(); }}
+                className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-red-300 hover:bg-red-950/30 hover:text-red-200 transition-colors border border-red-500/20 cursor-pointer"
+              >
+                <LogOut size={14} />
+                <span>Cerrar Sesión</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* CONTENIDO PRINCIPAL */}
       <div className="flex-1 flex flex-col h-full overflow-hidden print:h-auto print:overflow-visible print:block print:w-full">
         
-        {/* NAV SUPERIOR MÓVIL */}
-        <header className="print:hidden md:hidden bg-gradient-to-r from-[#5E1232] to-[#3a051a] text-white px-4 py-3 flex items-center justify-between shadow-md shrink-0 border-b border-white/10">
-          <div className="flex items-center gap-2.5 max-w-[70%]">
-            <div className="bg-white p-1 rounded-lg shrink-0">
-              <img src="/logo-sdr.png" alt="SDR Nayarit" className="h-6 w-auto object-contain" />
-            </div>
-            <h2 className="font-extrabold text-xs tracking-wider uppercase truncate">
-              {captureState.title}
-            </h2>
-          </div>
-          {captureState.actions && captureState.actions.length > 0 ? (
-            <div className="flex items-center gap-2">
-              {captureState.actions.filter(a => a.id === 'cancelar' || a.id === 'navigate-registrar').map(act => (
-                <button
-                  key={act.id}
-                  type="button"
-                  onClick={() => {
-                    if (act.id === 'navigate-registrar') safeNavigate('/registrar');
-                    else if (act.id === 'navigate-consultar') safeNavigate('/consultar');
-                    else window.dispatchEvent(new CustomEvent(`sdr-navbar-action-${act.id}`));
-                  }}
-                  className={`px-2.5 py-1 text-[10px] font-bold rounded-lg ${
-                    act.id === 'cancelar' ? 'bg-red-500/20 border border-red-500/30 text-red-200' : 'bg-white/10 text-white'
-                  }`}
-                >
-                  {act.text.split(' ')[0]}
-                </button>
-              ))}
-            </div>
-          ) : (
+        {/* NAV SUPERIOR MÓVIL (COMPACTO Y FUNCIONAL) */}
+        <header className="print:hidden md:hidden bg-[#5E1232] text-white px-3 py-2.5 flex items-center justify-between shadow-md shrink-0 border-b border-[#4A0A24] z-20">
+          {/* Lado izquierdo: Botón Menú Hamburguesa + Isotipo + Título */}
+          <div className="flex items-center gap-2 min-w-0 flex-1">
             <button
-              onClick={handleSafeLogout}
-              className="p-1.5 hover:bg-white/10 rounded-xl cursor-pointer"
-              title="Cerrar Sesión"
+              type="button"
+              onClick={() => setMobileMenuOpen(true)}
+              className="p-1.5 rounded-lg text-white/90 hover:text-white hover:bg-white/10 transition-colors cursor-pointer shrink-0"
+              aria-label="Abrir menú de navegación"
             >
-              <LogOut className="w-5 h-5 text-red-300" />
+              <Menu size={20} />
             </button>
-          )}
+
+            <div className="bg-white p-1 rounded-lg shrink-0">
+              <img src="/logo-sdr.png" alt="SDR Nayarit" className="h-5 w-auto object-contain" />
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <h2 className="font-bold text-xs tracking-tight uppercase truncate">
+                {captureState.title}
+              </h2>
+            </div>
+          </div>
+
+          {/* Lado derecho: Búsqueda, Notificaciones o Acciones de Captura */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            {captureState.actions && captureState.actions.length > 0 ? (
+              <div className="flex items-center gap-1.5">
+                {captureState.actions.filter(a => a.id === 'cancelar' || a.id === 'navigate-registrar').map(act => (
+                  <button
+                    key={act.id}
+                    type="button"
+                    onClick={() => {
+                      if (act.id === 'navigate-registrar') safeNavigate('/registrar');
+                      else if (act.id === 'navigate-consultar') safeNavigate('/consultar');
+                      else window.dispatchEvent(new CustomEvent(`sdr-navbar-action-${act.id}`));
+                    }}
+                    className={`px-2 py-1 text-[10px] font-bold rounded-lg ${
+                      act.id === 'cancelar' ? 'bg-red-500/20 border border-red-500/30 text-red-200' : 'bg-white/10 text-white'
+                    }`}
+                  >
+                    {act.text.split(' ')[0]}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <>
+                {/* Botón Omnibox Buscador Rápido Móvil */}
+                <button
+                  onClick={() => setShowOmnibox(true)}
+                  className="p-1.5 hover:bg-white/10 text-white/90 hover:text-white rounded-lg transition-colors cursor-pointer"
+                  title="Buscar expedientes (Ctrl+K)"
+                  aria-label="Buscar expedientes"
+                >
+                  <Search size={16} />
+                </button>
+
+                {/* Notificaciones Móvil */}
+                <div className="text-slate-800">
+                  <CentroNotificacionesMenu onSelectSolicitud={(sol) => setSelectedSolicitud(sol)} />
+                </div>
+              </>
+            )}
+          </div>
         </header>
 
         {/* NAV BAR SUPERIOR (DESKTOP) */}
@@ -684,7 +899,6 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
 
             {/* Centro de Notificaciones Inteligente */}
             <CentroNotificacionesMenu onSelectSolicitud={(sol) => setSelectedSolicitud(sol)} />
-
 
             {/* Acciones dinámicas de cada módulo */}
             {captureState.actions && captureState.actions.map(act => {
@@ -730,49 +944,79 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
           </div>
         </header>
 
-        {/* NAVEGACIÓN MÓVIL TAB BAR */}
-        <nav className="print:hidden md:hidden bg-white border-t border-slate-200 flex justify-around py-2 shrink-0 z-20 shadow-lg">
+        {/* ÁREA DE CONTENIDO */}
+        <main className="flex-1 overflow-y-auto p-3.5 sm:p-4 md:p-6 w-full pb-24 md:pb-6 print:p-0 print:m-0 print:overflow-visible print:h-auto print:block">
+          {children}
+        </main>
+
+        {/* NAVEGACIÓN MÓVIL INFERIOR FIJA (BOTTOM TAB BAR TIPO APP) */}
+        <nav className="print:hidden md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-slate-200 flex justify-around py-1.5 px-1 shadow-lg">
           <button
             onClick={() => safeNavigate('/')}
-            className={`flex flex-col items-center gap-1 text-[10px] font-semibold ${currentPath === '/' ? 'text-nayarit-gold' : 'text-slate-400'}`}
+            className={`flex flex-col items-center gap-0.5 py-1 px-2 text-[10px] font-bold transition-colors ${
+              currentPath === '/' ? 'text-[#5E1232]' : 'text-slate-400 hover:text-slate-600'
+            }`}
           >
-            <BarChart3 className="w-5 h-5" />
-            Dashboard
+            <BarChart3 className="w-4.5 h-4.5" />
+            <span>Inicio</span>
           </button>
+
           {currentUser?.role !== 'ANALISTA' && (
             <button
               onClick={() => safeNavigate('/registrar')}
-              className={`flex flex-col items-center gap-1 text-[10px] font-semibold ${currentPath === '/registrar' ? 'text-nayarit-gold' : 'text-slate-400'}`}
+              className={`flex flex-col items-center gap-0.5 py-1 px-2 text-[10px] font-bold transition-colors ${
+                currentPath === '/registrar' ? 'text-[#5E1232]' : 'text-slate-400 hover:text-slate-600'
+              }`}
             >
-              <PlusCircle className="w-5 h-5" />
-              Nueva
+              <PlusCircle className="w-4.5 h-4.5" />
+              <span>Nueva</span>
             </button>
           )}
+
           <button
             onClick={() => safeNavigate('/consultar')}
-            className={`flex flex-col items-center gap-1 text-[10px] font-semibold ${currentPath === '/consultar' ? 'text-nayarit-gold' : 'text-slate-400'}`}
+            className={`flex flex-col items-center gap-0.5 py-1 px-2 text-[10px] font-bold transition-colors ${
+              currentPath === '/consultar' ? 'text-[#5E1232]' : 'text-slate-400 hover:text-slate-600'
+            }`}
           >
-            <FileSpreadsheet className="w-5 h-5" />
-            Expedientes
+            <FileSpreadsheet className="w-4.5 h-4.5" />
+            <span>Trámites</span>
           </button>
+
           <button
             onClick={() => safeNavigate('/productores')}
-            className={`flex flex-col items-center gap-1 text-[10px] font-semibold ${currentPath === '/productores' ? 'text-nayarit-gold' : 'text-slate-400'}`}
+            className={`flex flex-col items-center gap-0.5 py-1 px-2 text-[10px] font-bold transition-colors ${
+              currentPath === '/productores' ? 'text-[#5E1232]' : 'text-slate-400 hover:text-slate-600'
+            }`}
           >
-            <Users className="w-5 h-5" />
-            Productores
+            <Users className="w-4.5 h-4.5" />
+            <span>Productores</span>
+          </button>
+
+          <button
+            onClick={() => setMobileMenuOpen(true)}
+            className="flex flex-col items-center gap-0.5 py-1 px-2 text-[10px] font-bold text-slate-500 hover:text-[#5E1232] transition-colors cursor-pointer"
+          >
+            <Menu className="w-4.5 h-4.5" />
+            <span>Menú</span>
           </button>
         </nav>
-
-        {/* ÁREA DE CONTENIDO */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 w-full pb-24 md:pb-6 print:p-0 print:m-0 print:overflow-visible print:h-auto print:block">
-          {children}
-        </main>
       </div>
+
+      {/* MODAL BUSCADOR OMNIBOX GLOBAL (MÓVIL Y ESCRITORIO CON CTRL+K) */}
+      <BuscadorOmniboxModal
+        isOpen={showOmnibox}
+        onClose={() => setShowOmnibox(false)}
+        onSelectExpediente={(solId) => {
+          handleOpenDetail(solId);
+          setShowOmnibox(false);
+        }}
+      />
 
       {/* MODAL DETALLE DE EXPEDIENTE GLOBAL DESDE NAVBAR / NOTIFICACIONES */}
       {selectedSolicitud && (
         <ExpedienteDetalleModal
+
           selectedSolicitud={selectedSolicitud}
           setSelectedSolicitud={setSelectedSolicitud}
           newEstatus={newEstatus}
