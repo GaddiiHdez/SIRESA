@@ -161,8 +161,9 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
       title: 'NUEVA SOLICITUD DE APOYO',
       subtitle: 'Registro y captura de expediente',
       iconKey: 'REGISTRO',
-      active: true
+      active: false
     },
+
     '/consultar': {
       label: 'SDR NAYARIT',
       title: 'CONSULTA DE EXPEDIENTES',
