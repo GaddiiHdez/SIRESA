@@ -44,7 +44,9 @@ export default function BuscadorNavbar({ onSelectExpediente }) {
       setLoading(true);
       try {
         const data = await apiGetSolicitudes({ limit: 15, folio: query });
-        setSolicitudes(Array.isArray(data?.solicitudes) ? data.solicitudes : []);
+        const list = Array.isArray(data) ? data : (data?.solicitudes || []);
+        setSolicitudes(list);
+
       } catch (err) {
         console.error('Error al cargar solicitudes para buscador:', err);
       } finally {

@@ -48,10 +48,11 @@ export default function DashboardPage() {
     try {
       const [statsData, solsData] = await Promise.all([
         apiGetStats(),
-        apiGetSolicitudes({ limit: 60 })
+        apiGetSolicitudes({ limit: 100 })
       ]);
       setStats(statsData);
-      setSolicitudes(solsData.solicitudes || []);
+      const lista = Array.isArray(solsData) ? solsData : (solsData?.solicitudes || []);
+      setSolicitudes(lista);
     } catch (error) {
       console.error("Error al cargar datos del panel de control:", error);
       toast.error("Error al sincronizar datos de la mesa de control.");
@@ -138,6 +139,7 @@ export default function DashboardPage() {
       const updated = await apiActualizarEstatus(selectedSolicitud.id, newEstatus, estatusComentario);
       await handleOpenExpediente(updated.id);
       loadData();
+      window.dispatchEvent(new CustomEvent('sdr-solicitud-updated', { detail: updated }));
       toast.success("Estatus actualizado exitosamente.");
     } catch (error) {
       console.error("Error al actualizar estatus:", error);
@@ -147,13 +149,19 @@ export default function DashboardPage() {
     }
   };
 
-  // Clasificación de expedientes por bandeja
+  // Clasificación de expedientes por bandeja (con normalización de tildes)
   const pendientes = useMemo(() => {
-    return solicitudes.filter(s => s.status === 'REGISTRADA' || s.status === 'EN REVISIÓN');
+    return solicitudes.filter(s => {
+      const st = (s.status || '').toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      return st === 'REGISTRADA' || st === 'EN REVISION';
+    });
   }, [solicitudes]);
 
   const aprobadas = useMemo(() => {
-    return solicitudes.filter(s => s.status === 'DICTAMINADA' || s.status === 'APROBADA' || s.status === 'PAGADA' || s.status === 'FINALIZADA');
+    return solicitudes.filter(s => {
+      const st = (s.status || '').toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      return st === 'DICTAMINADA' || st === 'APROBADA' || st === 'PAGADA' || st === 'FINALIZADA';
+    });
   }, [solicitudes]);
 
   // Lista filtrada según pestaña
@@ -162,6 +170,7 @@ export default function DashboardPage() {
     if (activeTab === 'APROBADAS') return aprobadas;
     return solicitudes;
   }, [solicitudes, pendientes, aprobadas, activeTab]);
+
 
   const getStatusBadge = (status) => {
     switch (status) {
