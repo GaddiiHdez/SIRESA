@@ -47,12 +47,21 @@ export default function LoginPage({ onLoginSuccess }) {
 
           {/* Bloque Superior: Logo Institucional */}
           <div className="space-y-6 relative z-10">
-            <div className="bg-white p-3.5 rounded-2xl shadow-xl border border-white/20 inline-block max-w-[240px]">
-              <img 
-                src="/logo-sdr.png" 
-                alt="Secretaría de Desarrollo Rural Nayarit" 
-                className="w-full h-auto object-contain"
-              />
+            <div className="flex items-center gap-3">
+              <div className="bg-white p-3 rounded-2xl shadow-xl border border-white/20 inline-block max-w-[200px]">
+                <img 
+                  src="/logo-sdr.png" 
+                  alt="Secretaría de Desarrollo Rural Nayarit" 
+                  className="w-full h-auto object-contain"
+                />
+              </div>
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#C29A52] via-[#dfb96f] to-[#8C6D32] p-[1.5px] shadow-xl shrink-0 overflow-hidden">
+                <img 
+                  src="/siresa-logo.png" 
+                  alt="SIRESA Isotipo" 
+                  className="w-full h-full object-cover rounded-[14px]"
+                />
+              </div>
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -66,6 +75,7 @@ export default function LoginPage({ onLoginSuccess }) {
               <h2 className="text-2xl font-black tracking-wider mt-3 text-white">
                 SIRESA
               </h2>
+
               <p className="text-[11px] text-nayarit-lightGold font-bold uppercase tracking-wider mt-1">
                 Sistema de Registro de Solicitudes de Apoyo
               </p>

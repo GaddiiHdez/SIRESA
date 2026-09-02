@@ -286,14 +286,13 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
           {!isCollapsed ? (
             <div className="flex items-center justify-between pt-1 px-1 animate-fadeIn">
               <div className="flex items-center gap-2.5 min-w-0">
-                {/* Emblema Isotipo 1:1 */}
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#C29A52] via-[#dfb96f] to-[#8C6D32] p-[1.5px] shadow-lg shadow-black/25 shrink-0 flex items-center justify-center">
-                  <div className="w-full h-full bg-gradient-to-b from-[#4A0A24] to-[#250311] rounded-[10px] flex items-center justify-center relative overflow-hidden">
-                    <div className="absolute inset-0 bg-radial from-amber-400/20 to-transparent pointer-events-none" />
-                    <span className="font-black text-base text-transparent bg-clip-text bg-gradient-to-b from-white via-amber-100 to-amber-300 font-sans tracking-tighter">
-                      S
-                    </span>
-                  </div>
+                {/* Emblema Isotipo Oficial SIRESA (Versión B1: Expediente & Aprobación) */}
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#C29A52] via-[#dfb96f] to-[#8C6D32] p-[1.5px] shadow-lg shadow-black/25 shrink-0 flex items-center justify-center overflow-hidden">
+                  <img 
+                    src="/siresa-logo.png" 
+                    alt="SIRESA Logo" 
+                    className="w-full h-full object-cover rounded-[10px]"
+                  />
                 </div>
 
                 {/* Tipografía de Marca Institucional */}
@@ -324,17 +323,17 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
             <div className="flex flex-col items-center gap-4 pt-1">
               {/* Isotipo 1:1 en modo colapsado */}
               <div 
-                className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#C29A52] via-[#dfb96f] to-[#8C6D32] p-[1.5px] shadow-lg shadow-black/30 shrink-0 flex items-center justify-center cursor-pointer group"
+                className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#C29A52] via-[#dfb96f] to-[#8C6D32] p-[1.5px] shadow-lg shadow-black/30 shrink-0 flex items-center justify-center cursor-pointer group overflow-hidden"
                 onClick={() => setIsCollapsed(false)}
                 title="SIRESA — Expandir menú"
               >
-                <div className="w-full h-full bg-gradient-to-b from-[#4A0A24] to-[#250311] group-hover:from-[#5d0e2f] group-hover:to-[#330419] rounded-[10px] flex items-center justify-center transition-smooth relative overflow-hidden">
-                  <div className="absolute inset-0 bg-radial from-amber-400/20 to-transparent pointer-events-none" />
-                  <span className="font-black text-lg text-transparent bg-clip-text bg-gradient-to-b from-white via-amber-100 to-amber-300 font-sans tracking-tighter">
-                    S
-                  </span>
-                </div>
+                <img 
+                  src="/siresa-logo.png" 
+                  alt="SIRESA Logo" 
+                  className="w-full h-full object-cover rounded-[10px] group-hover:scale-105 transition-transform"
+                />
               </div>
+
 
               <button 
                 onClick={() => setIsCollapsed(false)} 
@@ -635,11 +634,14 @@ export default function SidebarLayout({ currentUser, onLogout, children }) {
               {/* Encabezado del menú móvil */}
               <div className="flex items-center justify-between pb-3 border-b border-white/10">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#C29A52] via-[#dfb96f] to-[#8C6D32] p-[1.5px] shadow-sm flex items-center justify-center">
-                    <div className="w-full h-full bg-gradient-to-b from-[#4A0A24] to-[#250311] rounded-[10px] flex items-center justify-center">
-                      <span className="font-black text-sm text-transparent bg-clip-text bg-gradient-to-b from-white to-amber-200">S</span>
-                    </div>
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#C29A52] via-[#dfb96f] to-[#8C6D32] p-[1.5px] shadow-sm flex items-center justify-center overflow-hidden">
+                    <img 
+                      src="/siresa-logo.png" 
+                      alt="SIRESA Logo" 
+                      className="w-full h-full object-cover rounded-[10px]"
+                    />
                   </div>
+
                   <div>
                     <div className="flex items-center gap-1.5">
                       <span className="font-bold text-sm text-white tracking-wider">SIRESA</span>
