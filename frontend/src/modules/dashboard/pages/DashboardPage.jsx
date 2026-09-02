@@ -39,8 +39,24 @@ export default function DashboardPage() {
   // Pestaña activa en la Bandeja de Tareas ('PENDIENTES', 'APROBADAS', 'TODAS')
   const [activeTab, setActiveTab] = useState('PENDIENTES');
 
-  // Estado de expansión de la bandeja (retraída por defecto para no abrumar al usuario)
-  const [isExpanded, setIsExpanded] = useState(false);
+  // Estado de expansión de la bandeja persistido en localStorage (retraída por defecto 'false' la primera vez)
+  const [isExpanded, setIsExpanded] = useState(() => {
+    try {
+      const saved = localStorage.getItem('sdr_mesa_control_bandeja_expanded');
+      return saved !== null ? JSON.parse(saved) : false;
+    } catch {
+      return false;
+    }
+  });
+
+  // Guardar preferencia de expansión cada vez que cambie
+  useEffect(() => {
+    try {
+      localStorage.setItem('sdr_mesa_control_bandeja_expanded', JSON.stringify(isExpanded));
+    } catch (err) {
+      console.warn("No se pudo guardar la preferencia de bandeja:", err);
+    }
+  }, [isExpanded]);
 
   // Modal de Detalle de Expediente In-Place
 
