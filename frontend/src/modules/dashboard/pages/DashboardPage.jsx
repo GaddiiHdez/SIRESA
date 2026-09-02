@@ -18,8 +18,10 @@ import {
   ArrowUpRight,
   Filter,
   CheckCircle,
-  Send
+  Send,
+  ChevronDown
 } from 'lucide-react';
+
 import ExpedienteDetalleModal from '../../solicitudes/components/ExpedienteDetalleModal';
 import { formatMoneda, formatModulo } from '../../../shared/utils/formatters';
 import { getSectorIcon } from '../../../shared/config/sectoresMetadata';
@@ -37,7 +39,11 @@ export default function DashboardPage() {
   // Pestaña activa en la Bandeja de Tareas ('PENDIENTES', 'APROBADAS', 'TODAS')
   const [activeTab, setActiveTab] = useState('PENDIENTES');
 
+  // Estado de expansión de la bandeja (retraída por defecto para no abrumar al usuario)
+  const [isExpanded, setIsExpanded] = useState(false);
+
   // Modal de Detalle de Expediente In-Place
+
   const [selectedSolicitud, setSelectedSolicitud] = useState(null);
   const [modalLoading, setModalLoading] = useState(false);
   const [newEstatus, setNewEstatus] = useState('');
@@ -235,7 +241,10 @@ export default function DashboardPage() {
         
         {/* PENDIENTES / POR DICTAMINAR */}
         <button
-          onClick={() => setActiveTab('PENDIENTES')}
+          onClick={() => {
+            setActiveTab('PENDIENTES');
+            setIsExpanded(true);
+          }}
           className={`p-4 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between shadow-xs ${
             activeTab === 'PENDIENTES'
               ? 'bg-amber-50 border-amber-300 ring-2 ring-amber-400/20'
@@ -254,7 +263,10 @@ export default function DashboardPage() {
 
         {/* DICTAMINADAS Y APROBADAS */}
         <button
-          onClick={() => setActiveTab('APROBADAS')}
+          onClick={() => {
+            setActiveTab('APROBADAS');
+            setIsExpanded(true);
+          }}
           className={`p-4 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between shadow-xs ${
             activeTab === 'APROBADAS'
               ? 'bg-emerald-50 border-emerald-300 ring-2 ring-emerald-400/20'
@@ -273,7 +285,10 @@ export default function DashboardPage() {
 
         {/* TOTAL DE EXPEDIENTES */}
         <button
-          onClick={() => setActiveTab('TODAS')}
+          onClick={() => {
+            setActiveTab('TODAS');
+            setIsExpanded(true);
+          }}
           className={`p-4 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between shadow-xs ${
             activeTab === 'TODAS'
               ? 'bg-blue-50 border-blue-300 ring-2 ring-blue-400/20'
@@ -289,6 +304,7 @@ export default function DashboardPage() {
             <FileText size={20} />
           </div>
         </button>
+
 
         {/* PADRÓN DE PRODUCTORES */}
         <button
@@ -308,190 +324,247 @@ export default function DashboardPage() {
 
       </div>
 
-      {/* ── 3. BANDEJA DE TAREAS Y EXPEDIENTES (TABLA OPERATIVA) ──────────────── */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+      {/* ── 3. BANDEJA DE TAREAS Y EXPEDIENTES (TABLA OPERATIVA RETRÁCTIL) ────── */}
+      <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden transition-all duration-300">
         
-        {/* HEADER DE LA BANDEJA CON PESTAÑAS */}
+        {/* HEADER DE LA BANDEJA CON PESTAÑAS Y BOTÓN DE RETRAER/EXPANDIR */}
         <div className="p-4 md:p-5 border-b border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-slate-100 text-[#5E1232] rounded-lg">
+          <div 
+            onClick={() => setIsExpanded(prev => !prev)}
+            className="flex items-center gap-3 cursor-pointer select-none group"
+            title={isExpanded ? "Clic para retraer la bandeja" : "Clic para expandir y ver expedientes"}
+          >
+            <div className="p-2 bg-slate-100 text-[#5E1232] rounded-lg group-hover:bg-[#5E1232]/10 transition-colors">
               <Inbox size={18} />
             </div>
             <div>
-              <h2 className="text-base font-bold text-slate-900 leading-tight">
-                Expedientes y Solicitudes
-              </h2>
+              <div className="flex items-center gap-2">
+                <h2 className="text-base font-bold text-slate-900 leading-tight group-hover:text-[#5E1232] transition-colors">
+                  Expedientes y Solicitudes
+                </h2>
+                <span className={`p-1 rounded-md text-slate-400 group-hover:text-slate-700 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}>
+                  <ChevronDown size={16} />
+                </span>
+              </div>
               <span className="text-xs text-slate-500 font-medium">
-                {filteredList.length} expediente(s) en esta vista
+                {isExpanded 
+                  ? `${filteredList.length} expediente(s) en esta vista`
+                  : `${solicitudes.length} expediente(s) en total • Clic para ${isExpanded ? 'retraer' : 'desplegar'}`
+                }
               </span>
             </div>
           </div>
 
-          {/* PESTAÑAS OPERATIVAS */}
-          <div className="flex bg-slate-100 p-1 rounded-lg gap-1 w-full sm:w-auto">
+          {/* CONTROLES Y PESTAÑAS OPERATIVAS */}
+          <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
+            {/* PESTAÑAS OPERATIVAS */}
+            <div className="flex bg-slate-100 p-1 rounded-lg gap-1 flex-1 sm:flex-initial">
+              <button
+                onClick={() => {
+                  setActiveTab('PENDIENTES');
+                  if (!isExpanded) setIsExpanded(true);
+                }}
+                className={`flex-1 sm:flex-initial px-3.5 py-1.5 rounded font-bold text-xs transition-all cursor-pointer ${
+                  activeTab === 'PENDIENTES'
+                    ? 'bg-white text-slate-900 shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Por Dictaminar ({pendientes.length})
+              </button>
+              <button
+                onClick={() => {
+                  setActiveTab('APROBADAS');
+                  if (!isExpanded) setIsExpanded(true);
+                }}
+                className={`flex-1 sm:flex-initial px-3.5 py-1.5 rounded font-bold text-xs transition-all cursor-pointer ${
+                  activeTab === 'APROBADAS'
+                    ? 'bg-white text-slate-900 shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Aprobadas ({aprobadas.length})
+              </button>
+              <button
+                onClick={() => {
+                  setActiveTab('TODAS');
+                  if (!isExpanded) setIsExpanded(true);
+                }}
+                className={`flex-1 sm:flex-initial px-3.5 py-1.5 rounded font-bold text-xs transition-all cursor-pointer ${
+                  activeTab === 'TODAS'
+                    ? 'bg-white text-slate-900 shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Todas ({solicitudes.length})
+              </button>
+            </div>
+
+            {/* BOTÓN EXPLÍCITO DE EXPANDIR / RETRAER */}
             <button
-              onClick={() => setActiveTab('PENDIENTES')}
-              className={`flex-1 sm:flex-initial px-3.5 py-1.5 rounded font-bold text-xs transition-all cursor-pointer ${
-                activeTab === 'PENDIENTES'
-                  ? 'bg-white text-slate-900 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
+              onClick={() => setIsExpanded(prev => !prev)}
+              className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
+              title={isExpanded ? "Ocultar lista de expedientes" : "Mostrar lista de expedientes"}
             >
-              Por Dictaminar ({pendientes.length})
-            </button>
-            <button
-              onClick={() => setActiveTab('APROBADAS')}
-              className={`flex-1 sm:flex-initial px-3.5 py-1.5 rounded font-bold text-xs transition-all cursor-pointer ${
-                activeTab === 'APROBADAS'
-                  ? 'bg-white text-slate-900 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Aprobadas ({aprobadas.length})
-            </button>
-            <button
-              onClick={() => setActiveTab('TODAS')}
-              className={`flex-1 sm:flex-initial px-3.5 py-1.5 rounded font-bold text-xs transition-all cursor-pointer ${
-                activeTab === 'TODAS'
-                  ? 'bg-white text-slate-900 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Todas ({solicitudes.length})
+              <span>{isExpanded ? 'Retraer' : 'Expandir Bandeja'}</span>
+              <ChevronDown size={14} className={`transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
             </button>
           </div>
 
         </div>
 
-        {/* LISTADO / TABLA DE EXPEDIENTES */}
-        {filteredList.length === 0 ? (
-          <div className="text-center py-16 space-y-3 bg-slate-50">
-            <CheckCircle className="w-10 h-10 text-emerald-600 mx-auto" />
-            <div className="space-y-1">
-              <h3 className="text-sm font-bold text-slate-800">Bandeja sin pendientes</h3>
-              <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                No hay expedientes pendientes con los filtros seleccionados.
-              </p>
-            </div>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
-              <thead>
-                <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 font-bold uppercase tracking-wider text-[10px]">
-                  <th className="py-3 px-5">Folio / Sector</th>
-                  <th className="py-3 px-5">Productor Titular</th>
-                  <th className="py-3 px-5">Ubicación</th>
-                  <th className="py-3 px-5">Monto Solicitado</th>
-                  <th className="py-3 px-5 text-center">Estatus</th>
-                  <th className="py-3 px-5 text-center">Acción</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200 font-medium text-slate-700">
-                {filteredList.map((sol) => {
-                  const SectorIcon = getSectorIcon(sol.moduloTipo);
-                  const prodNombre = sol.productor?.nombreCompleto || 
-                    `${sol.productor?.nombre || ''} ${sol.productor?.apellidoPaterno || ''}`.trim() ||
-                    sol.productor?.nombreOrganizacion || 'Productor Registrado';
-
-                  return (
-                    <tr key={sol.id} className="hover:bg-slate-50 transition-colors">
-                      
-                      {/* FOLIO Y SECTOR */}
-                      <td className="py-3.5 px-5">
-                        <div className="flex items-center gap-2.5">
-                          <div className="p-1.5 bg-slate-100 text-[#5E1232] rounded-lg shrink-0">
-                            <SectorIcon size={15} />
-                          </div>
-                          <div>
-                            <span className="font-mono font-bold text-slate-900 text-xs block">
-                              {sol.folio}
-                            </span>
-                            <span className="text-[10px] text-slate-500 font-medium block">
-                              {formatModulo(sol.moduloTipo)}
-                            </span>
-                          </div>
-                        </div>
-                      </td>
-
-                      {/* PRODUCTOR */}
-                      <td className="py-3.5 px-5">
-                        <div className="font-semibold text-slate-900 text-xs">{prodNombre}</div>
-                        {sol.productor?.curp && (
-                          <span className="font-mono text-[10px] text-slate-500 block">
-                            {sol.productor.curp}
-                          </span>
-                        )}
-                      </td>
-
-                      {/* UBICACIÓN */}
-                      <td className="py-3.5 px-5">
-                        <div className="font-medium text-slate-800">{sol.productor?.municipio || 'Nayarit'}</div>
-                        <div className="text-slate-500 text-[10px]">{sol.productor?.localidad || 'Localidad'}</div>
-                      </td>
-
-                      {/* APOYO SOLICITADO */}
-                      <td className="py-3.5 px-5">
-                        <div className="font-bold text-slate-900">
-                          {formatMoneda(sol.apoyoControl?.montoTotal || 0)}
-                        </div>
-                        <div className="text-slate-500 text-[10px] truncate max-w-xs font-medium">
-                          {sol.apoyoControl?.conceptoApoyo || 'Apoyo al sector'}
-                        </div>
-                      </td>
-
-                      {/* ESTATUS */}
-                      <td className="py-3.5 px-5 text-center">
-                        <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${getStatusBadge(sol.status)}`}>
-                          {sol.status}
-                        </span>
-                      </td>
-
-                      {/* ACCIÓN: REVISAR */}
-                      <td className="py-3.5 px-5 text-center">
-                        <button
-                          onClick={() => handleOpenExpediente(sol.id)}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer"
-                        >
-                          <span>Revisar</span>
-                          <ChevronRight size={13} />
-                        </button>
-                      </td>
-
+        {/* CONTENIDO DE LA BANDEJA (SOLO CUANDO ESTÁ EXPANDIDA) */}
+        {isExpanded ? (
+          <>
+            {/* LISTADO / TABLA DE EXPEDIENTES */}
+            {filteredList.length === 0 ? (
+              <div className="text-center py-16 space-y-3 bg-slate-50">
+                <CheckCircle className="w-10 h-10 text-emerald-600 mx-auto" />
+                <div className="space-y-1">
+                  <h3 className="text-sm font-bold text-slate-800">Bandeja sin pendientes</h3>
+                  <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                    No hay expedientes pendientes con los filtros seleccionados.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 font-bold uppercase tracking-wider text-[10px]">
+                      <th className="py-3 px-5">Folio / Sector</th>
+                      <th className="py-3 px-5">Productor Titular</th>
+                      <th className="py-3 px-5">Ubicación</th>
+                      <th className="py-3 px-5">Monto Solicitado</th>
+                      <th className="py-3 px-5 text-center">Estatus</th>
+                      <th className="py-3 px-5 text-center">Acción</th>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200 font-medium text-slate-700">
+                    {filteredList.map((sol) => {
+                      const SectorIcon = getSectorIcon(sol.moduloTipo);
+                      const prodNombre = sol.productor?.nombreCompleto || 
+                        `${sol.productor?.nombre || ''} ${sol.productor?.apellidoPaterno || ''}`.trim() ||
+                        sol.productor?.nombreOrganizacion ||
+                        (sol.moduloTipo === 'MEDIOS' || sol.moduloTipo === 'TEMAS_IMPORTANTES' ? 'Coordinación Institucional' : 'Productor Registrado');
+
+                      return (
+                        <tr key={sol.id} className="hover:bg-slate-50 transition-colors">
+                          
+                          {/* FOLIO Y SECTOR */}
+                          <td className="py-3.5 px-5">
+                            <div className="flex items-center gap-2.5">
+                              <div className="p-1.5 bg-slate-100 text-[#5E1232] rounded-lg shrink-0">
+                                <SectorIcon size={15} />
+                              </div>
+                              <div>
+                                <span className="font-mono font-bold text-slate-900 text-xs block">
+                                  {sol.folio}
+                                </span>
+                                <span className="text-[10px] text-slate-500 font-medium block">
+                                  {formatModulo(sol.moduloTipo)}
+                                </span>
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* PRODUCTOR */}
+                          <td className="py-3.5 px-5">
+                            <div className="font-semibold text-slate-900 text-xs">{prodNombre}</div>
+                            {sol.productor?.curp && (
+                              <span className="font-mono text-[10px] text-slate-500 block">
+                                {sol.productor.curp}
+                              </span>
+                            )}
+                          </td>
+
+                          {/* UBICACIÓN */}
+                          <td className="py-3.5 px-5">
+                            <div className="font-medium text-slate-800">{sol.productor?.municipio || 'Nayarit'}</div>
+                            <div className="text-slate-500 text-[10px]">{sol.productor?.localidad || 'Localidad'}</div>
+                          </td>
+
+                          {/* APOYO SOLICITADO */}
+                          <td className="py-3.5 px-5">
+                            <div className="font-bold text-slate-900">
+                              {formatMoneda(sol.apoyoControl?.montoTotal || 0)}
+                            </div>
+                            <div className="text-slate-500 text-[10px] truncate max-w-xs font-medium">
+                              {sol.apoyoControl?.conceptoApoyo || 'Apoyo al sector'}
+                            </div>
+                          </td>
+
+                          {/* ESTATUS */}
+                          <td className="py-3.5 px-5 text-center">
+                            <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${getStatusBadge(sol.status)}`}>
+                              {sol.status}
+                            </span>
+                          </td>
+
+                          {/* ACCIÓN: REVISAR */}
+                          <td className="py-3.5 px-5 text-center">
+                            <button
+                              onClick={() => handleOpenExpediente(sol.id)}
+                              className="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+                            >
+                              <span>Revisar</span>
+                              <ChevronRight size={13} />
+                            </button>
+                          </td>
+
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* FOOTER CON BOTÓN DE CONSULTA */}
+            <div className="p-3.5 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <span className="text-xs text-slate-500 font-medium">
+                Expedientes registrados en el ciclo fiscal activo.
+              </span>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={() => navigate('/consultar')}
+                  className="px-3.5 py-1.5 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 font-semibold text-xs rounded-lg transition-colors cursor-pointer"
+                >
+                  Consulta Avanzada →
+                </button>
+                {currentUser?.role !== 'ANALISTA' && (
+                  <button
+                    onClick={() => navigate('/registrar')}
+                    className="px-3.5 py-1.5 bg-[#5E1232] hover:bg-[#4a0d27] text-white font-bold text-xs rounded-lg flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
+                  >
+                    <PlusCircle size={14} /> Nueva Solicitud
+                  </button>
+                )}
+              </div>
+            </div>
+          </>
+        ) : (
+          /* ESTADO RETRAÍDO: VISTA COMPACTA ELEGANTE */
+          <div 
+            onClick={() => setIsExpanded(true)}
+            className="p-4 bg-slate-50/50 hover:bg-slate-50 flex items-center justify-between cursor-pointer text-xs text-slate-600 transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-slate-700">La bandeja está retraída.</span>
+              <span className="text-slate-400">Haz clic para ver los {filteredList.length} expediente(s) de la pestaña "{activeTab === 'PENDIENTES' ? 'Por Dictaminar' : activeTab === 'APROBADAS' ? 'Listas para Pago' : 'Todas'}".</span>
+            </div>
+            <button 
+              className="text-[#5E1232] hover:underline font-bold flex items-center gap-1"
+            >
+              Ver expedientes <ChevronDown size={14} />
+            </button>
           </div>
         )}
 
-        {/* FOOTER CON BOTÓN DE CONSULTA */}
-        <div className="p-3.5 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <span className="text-xs text-slate-500 font-medium">
-            Expedientes registrados en el ciclo fiscal activo.
-          </span>
-
-          <div className="flex gap-2">
-            <button
-              onClick={() => navigate('/consultar')}
-              className="px-3.5 py-1.5 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 font-semibold text-xs rounded-lg transition-colors cursor-pointer"
-            >
-              Consulta Avanzada →
-            </button>
-            {currentUser?.role !== 'ANALISTA' && (
-              <button
-                onClick={() => navigate('/registrar')}
-                className="px-3.5 py-1.5 bg-[#5E1232] hover:bg-[#4a0d27] text-white font-bold text-xs rounded-lg flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
-              >
-                <PlusCircle size={14} /> Nueva Solicitud
-              </button>
-            )}
-          </div>
-        </div>
-
       </div>
+
 
 
       {/* ── 4. MODAL DE DETALLE Y DICTAMEN DE EXPEDIENTE IN-PLACE ──────────────── */}
